@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f0f4f6",
+                    "primary-fixed": "#6af199",
+                    "primary-dim": "#006031",
+                    "surface-bright": "#f8fafb",
+                    "on-background": "#2c3436",
+                    "surface-container": "#eaeff0",
+                    "inverse-on-surface": "#9a9d9e",
+                    "primary": "#006e39",
+                    "error-dim": "#67040d",
+                    "surface-variant": "#dce4e6",
+                    "secondary-dim": "#48555f",
+                    "outline-variant": "#acb3b6",
+                    "background": "#f8fafb",
+                    "tertiary-container": "#e4f2b3",
+                    "secondary-fixed-dim": "#c9d6e3",
+                    "on-primary": "#e8ffe9",
+                    "on-tertiary-fixed": "#3e491b",
+                    "on-secondary": "#f5f9ff",
+                    "secondary-container": "#d7e4f1",
+                    "outline": "#747c7e",
+                    "surface": "#f8fafb",
+                    "surface-container-high": "#e3e9eb",
+                    "tertiary-fixed-dim": "#d6e3a6",
+                    "on-tertiary-container": "#505b2b",
+                    "on-secondary-fixed": "#35414b",
+                    "tertiary-fixed": "#e4f2b3",
+                    "on-primary-fixed-variant": "#006232",
+                    "error-container": "#fa746f",
+                    "on-secondary-container": "#47535e",
+                    "on-surface-variant": "#596063",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error": "#fff7f6",
+                    "on-tertiary": "#f3ffc4",
+                    "on-tertiary-fixed-variant": "#5a6634",
+                    "on-secondary-fixed-variant": "#515d68",
+                    "tertiary": "#586433",
+                    "surface-dim": "#d4dbde",
+                    "surface-tint": "#006e39",
+                    "secondary-fixed": "#d7e4f1",
+                    "inverse-surface": "#0b0f10",
+                    "secondary": "#54616b",
+                    "tertiary-dim": "#4d5828",
+                    "surface-container-highest": "#dce4e6",
+                    "on-error-container": "#6e0a12",
+                    "primary-fixed-dim": "#5be28c",
+                    "error": "#a83836",
+                    "on-surface": "#2c3436",
+                    "on-primary-fixed": "#00421f",
+                    "primary-container": "#6af199",
+                    "inverse-primary": "#6af199",
+                    "on-primary-container": "#00572c"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-headline { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- TopNavBar -->
+<header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md shadow-sm dark:shadow-none docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-6 py-4 max-w-[1440px] mx-auto">
+<div class="flex items-center gap-8">
+<span class="text-2xl font-extrabold tracking-tight text-emerald-800 dark:text-emerald-400">The Curated Canvas</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" href="#">Sustainability</a>
+<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" href="#">Privacy</a>
+<a class="text-slate-600 dark:text-slate-400 font-medium hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" href="#">Terms</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center gap-3 mr-4">
+<button class="text-emerald-700 dark:text-emerald-400 font-semibold px-4 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all">Become a Seller</button>
+<button class="text-emerald-700 dark:text-emerald-400 font-semibold px-4 py-2 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all">Become a Courier</button>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">shopping_cart</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined">chat</span>
+</button>
+<button class="p-2 text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 rounded-full transition-colors active:scale-95 duration-150">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<main class="max-w-[1440px] mx-auto flex min-h-screen">
+<!-- SideNavBar -->
+<aside class="hidden md:flex flex-col p-4 gap-2 h-screen w-64 bg-slate-50 dark:bg-slate-900 border-r-0 sticky top-[72px]">
+<div class="mb-6 px-4">
+<h2 class="text-xl font-bold text-emerald-800 font-headline">Account Settings</h2>
+<p class="text-sm text-on-surface-variant">Manage your profile</p>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-medium">Profile Info</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">location_on</span>
+<span class="font-medium">Addresses</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-medium">Payments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 font-semibold rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-medium">Wishlist</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 dark:text-slate-400 hover:bg-emerald-50/50 dark:hover:bg-emerald-900/10 rounded-lg transition-all duration-200 ease-in-out" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-medium">Orders</span>
+</a>
+</nav>
+</aside>
+<!-- Main Canvas -->
+<section class="flex-1 bg-surface-container-low p-6 md:p-12">
+<div class="max-w-5xl mx-auto">
+<header class="mb-10">
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface font-headline mb-2">Your Wishlist</h1>
+<p class="text-on-surface-variant body-md">Items you've curated for your future collection.</p>
+</header>
+<!-- Active Wishlist Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Product Card 1 -->
+<div class="group relative bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-xl transition-all duration-300">
+<div class="relative aspect-square mb-4 overflow-hidden rounded-lg bg-surface-container">
+<img alt="Fine art painting" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Modern abstract oil painting with earthy tones and textured brushstrokes on a minimalist studio wall background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuzIhYiaOZgU9JcOmjHUN3s81cRgkyBRCXLsfAXccJqUnAhkaokScX1NM_n4osaID5x0D85la81hJSZEkwWA5MVtLGOHP0cCLF16DLLY_w5L-BTcHEUo7ELETmDFDevn3CvJFLqaLf_EOSIndYEzzQcj02VGm_FGETSJFIPwNvkdvS-Gc53RJmcKECG7DRX98l6VaVa6nQaVY6tL0-bSHdWLys7iC3z9u58u-rOqjYVDQS99bMHeqvK_vQFfT71mgc9c3rYiBI14U"/>
+<span class="absolute top-3 left-3 bg-primary-fixed-dim text-on-primary-fixed px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">New</span>
+<button class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur text-error hover:bg-error-container hover:text-on-error-container rounded-full transition-all duration-200 shadow-sm opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-bold text-on-surface text-lg truncate">Ephemeral Drift #4</h3>
+<p class="text-on-surface-variant text-sm">By Studio Arthemis</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-primary font-extrabold text-xl font-headline">$1,240</span>
+</div>
+</div>
+<button class="w-full mt-4 py-3 bg-primary text-on-primary rounded-lg font-bold hover:brightness-110 transition-all active:scale-95">Move to Cart</button>
+</div>
+<!-- Product Card 2 (With Discount) -->
+<div class="group relative bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-xl transition-all duration-300">
+<div class="relative aspect-square mb-4 overflow-hidden rounded-lg bg-surface-container">
+<img alt="Ceramic sculpture" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Handcrafted minimalist white ceramic vase with organic curves standing on a raw wooden table in soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPHCrovJE8pgm3AVnNEyByyqc5L1dRH1xFcTqJBwUbw26FwS7Z4CaoSYy-hI7qnTBSygLi06HU4MS7Ae61SnwC5sJFkUZcJlb6LLG4iEs0qI7hYDLHK0iArb-rnfmeICPdyKahRCUo3r1jfOYe__f0DAVzqwnIGva2ildtQhu2VpyQR3yIbDsZ7g8ooWF2KeZ2KduuPY2Ya1BcJfCZiLWoOKpPS3vAEMugyWgzdddXdj8_awwAV8dBVCJb8C0v9TzkBaEX1Db2MXs"/>
+<span class="absolute top-3 left-3 bg-error-container text-on-error-container px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">-15%</span>
+<button class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur text-error hover:bg-error-container hover:text-on-error-container rounded-full transition-all duration-200 shadow-sm opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-bold text-on-surface text-lg truncate">Ovoid Vessel No. 12</h3>
+<p class="text-on-surface-variant text-sm">Handcrafted Ceramics</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-primary font-extrabold text-xl font-headline">$385</span>
+<span class="text-on-surface-variant text-sm line-through">$450</span>
+</div>
+</div>
+<button class="w-full mt-4 py-3 bg-primary text-on-primary rounded-lg font-bold hover:brightness-110 transition-all active:scale-95">Move to Cart</button>
+</div>
+<!-- Product Card 3 -->
+<div class="group relative bg-surface-container-lowest rounded-xl p-4 shadow-sm hover:shadow-xl transition-all duration-300">
+<div class="relative aspect-square mb-4 overflow-hidden rounded-lg bg-surface-container">
+<img alt="Woven textile" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Intricate indigo dyed woven textile hanging with complex geometric patterns in a clean contemporary home setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmqjstkks0r_T_-HUhc3Sb114cwk61vqVkiFct7pRpDsDYUa6Ig4gNyJkO2MaGktrL2a-5sxyG5zurXBrBKQIp9jn_2JLvYTlXl-sjlB5KRNEMxLPHitfpNdtmjKYjzc5_wUd70E_0xIGowmJm1WRRB65Jn75Js17r_GJTC8Ps7ll2Sw-TED1yJf7-mzp8IavWj4L6gE1KezF5Z9SgOcnDYGSG0vllNh6fe4KBZe5w5muA_7CkiaXdvISmt6BGvG9Xl7gbOW9Dr8M"/>
+<button class="absolute top-3 right-3 p-2 bg-white/90 backdrop-blur text-error hover:bg-error-container hover:text-on-error-container rounded-full transition-all duration-200 shadow-sm opacity-0 group-hover:opacity-100 scale-90 group-hover:scale-100">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<h3 class="font-bold text-on-surface text-lg truncate">Indigo Warp Hanging</h3>
+<p class="text-on-surface-variant text-sm">Textile Collective</p>
+<div class="flex items-baseline gap-2 mt-2">
+<span class="text-primary font-extrabold text-xl font-headline">$820</span>
+</div>
+</div>
+<button class="w-full mt-4 py-3 bg-primary text-on-primary rounded-lg font-bold hover:brightness-110 transition-all active:scale-95">Move to Cart</button>
+</div>
+</div>
+<!-- Empty State (Hidden when items exist, shown for demonstration) -->
+<div class="mt-20 flex flex-col items-center text-center max-w-md mx-auto hidden">
+<div class="w-64 h-64 bg-surface-container-high rounded-full flex items-center justify-center mb-8">
+<span class="material-symbols-outlined text-9xl text-outline-variant" style="font-variation-settings: 'wght' 200;">favorite</span>
+</div>
+<h2 class="text-2xl font-bold text-on-surface font-headline mb-3">Your Canvas is Empty</h2>
+<p class="text-on-surface-variant mb-8">Explore our curated collections and start saving your favorite pieces to your wishlist today.</p>
+<button class="px-8 py-3 bg-primary text-on-primary rounded-full font-bold shadow-lg shadow-emerald-900/20 hover:scale-105 transition-transform">Explore Marketplace</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-slate-50 dark:bg-slate-950 full-width py-12 px-6 mt-20">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8">
+<div class="flex flex-col gap-4">
+<span class="text-lg font-bold text-emerald-800 dark:text-emerald-400 font-headline uppercase tracking-tighter">The Curated Canvas</span>
+<p class="text-sm text-slate-500 dark:text-slate-400 pr-4">Elevating the digital marketplace into an editorial experience. Authenticated art and design for the modern collector.</p>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-4 font-headline uppercase text-xs tracking-widest">Platform</h4>
+<ul class="flex flex-col gap-2">
+<li><a class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-all hover:translate-x-1 duration-200 inline-block uppercase text-[10px] tracking-wider" href="#">Sustainability</a></li>
+<li><a class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-all hover:translate-x-1 duration-200 inline-block uppercase text-[10px] tracking-wider" href="#">API Documentation</a></li>
+<li><a class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-all hover:translate-x-1 duration-200 inline-block uppercase text-[10px] tracking-wider" href="#">Help Center</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-4 font-headline uppercase text-xs tracking-widest">Legal</h4>
+<ul class="flex flex-col gap-2">
+<li><a class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-all hover:translate-x-1 duration-200 inline-block uppercase text-[10px] tracking-wider" href="#">Privacy Policy</a></li>
+<li><a class="text-sm text-slate-500 dark:text-slate-400 hover:text-emerald-700 transition-all hover:translate-x-1 duration-200 inline-block uppercase text-[10px] tracking-wider" href="#">Terms of Service</a></li>
+</ul>
+</div>
+<div class="flex flex-col gap-4">
+<h4 class="font-bold text-on-surface mb-4 font-headline uppercase text-xs tracking-widest">Newsletter</h4>
+<div class="relative">
+<input class="w-full bg-surface-container-highest border-none rounded-lg text-sm px-4 py-3 focus:ring-2 focus:ring-primary focus:bg-surface-container-lowest transition-all" placeholder="Email Address" type="email"/>
+<button class="absolute right-2 top-1.5 p-1.5 bg-primary text-on-primary rounded-md">
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="max-w-7xl mx-auto mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 text-center md:text-left">
+<span class="text-xs text-slate-400">© 2024 The Curated Canvas. All rights reserved.</span>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-lg px-6 py-3 flex justify-between items-center z-50">
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined">home</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined">search</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Search</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-emerald-700">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Wishlist</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-slate-500">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] uppercase font-bold tracking-tighter">Profile</span>
+</button>
+</div>
+</body></html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Order History - The Curated Canvas</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#2c3436",
+                        "surface": "#f8fafb",
+                        "on-error": "#fff7f6",
+                        "secondary-fixed-dim": "#c9d6e3",
+                        "surface-container-highest": "#dce4e6",
+                        "inverse-on-surface": "#9a9d9e",
+                        "on-surface-variant": "#596063",
+                        "primary-dim": "#006031",
+                        "on-error-container": "#6e0a12",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed-variant": "#515d68",
+                        "on-primary-fixed-variant": "#006232",
+                        "secondary-fixed": "#d7e4f1",
+                        "surface-bright": "#f8fafb",
+                        "surface-tint": "#006e39",
+                        "on-tertiary-fixed-variant": "#5a6634",
+                        "inverse-surface": "#0b0f10",
+                        "surface-container-low": "#f0f4f6",
+                        "tertiary-container": "#e4f2b3",
+                        "tertiary": "#586433",
+                        "outline-variant": "#acb3b6",
+                        "secondary-container": "#d7e4f1",
+                        "surface-variant": "#dce4e6",
+                        "outline": "#747c7e",
+                        "surface-container-high": "#e3e9eb",
+                        "primary": "#006e39",
+                        "on-tertiary-container": "#505b2b",
+                        "error-container": "#fa746f",
+                        "on-secondary": "#f5f9ff",
+                        "background": "#f8fafb",
+                        "tertiary-dim": "#4d5828",
+                        "on-primary": "#e8ffe9",
+                        "inverse-primary": "#6af199",
+                        "error": "#a83836",
+                        "tertiary-fixed": "#e4f2b3",
+                        "secondary-dim": "#48555f",
+                        "error-dim": "#67040d",
+                        "on-primary-container": "#00572c",
+                        "tertiary-fixed-dim": "#d6e3a6",
+                        "surface-container": "#eaeff0",
+                        "on-secondary-container": "#47535e",
+                        "on-secondary-fixed": "#35414b",
+                        "primary-fixed": "#6af199",
+                        "primary-container": "#6af199",
+                        "on-surface": "#2c3436",
+                        "on-tertiary-fixed": "#3e491b",
+                        "primary-fixed-dim": "#5be28c",
+                        "secondary": "#54616b",
+                        "on-primary-fixed": "#00421f",
+                        "surface-dim": "#d4dbde",
+                        "on-tertiary": "#f3ffc4"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafb;
+            color: #2c3436;
+        }
+        h1, h2, h3, .headline {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface antialiased">
+<!-- TopNavBar from Shared Components -->
+<nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl shadow-[0_12px_40px_rgba(44,52,54,0.06)]">
+<div class="flex items-center justify-between px-8 py-4 max-w-[1440px] mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-emerald-900 dark:text-emerald-50">
+                The Curated Canvas
+            </div>
+<div class="hidden md:flex items-center space-x-8 font-manrope text-sm font-medium tracking-tight">
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" href="#">Categories</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" href="#">New Arrivals</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-emerald-600 dark:hover:text-emerald-300 transition-colors" href="#">Deals</a>
+</div>
+<div class="flex items-center space-x-6">
+<div class="flex space-x-4">
+<button class="text-emerald-800 dark:text-emerald-400 hover:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined" data-icon="shopping_cart">shopping_cart</span>
+</button>
+<button class="text-emerald-800 dark:text-emerald-400 hover:scale-95 duration-200 ease-out">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+</div>
+<img alt="User profile" class="w-8 h-8 rounded-full object-cover" data-alt="Professional portrait of a woman with a confident expression, soft natural lighting in a modern architectural setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZ2X1Rxp6PA4ZIBK4isue5UwCU1l4rm378GCdmsnGZ29sCctg6Xk7284mBjbUzsk9IoNKjG85PfyUDdfoG0__IsmB4JXIxz-eF52Up4WWmQRgDbBdEey97sDIh0LnPVxFZ2OYo14wzSP-rcQzpXxkU9EkMoheBCGtrYKi9sYxiix098iX-DFSgyeD1FQOMKX2eo_7Jkjtel33uthMyepE3ldXJMNWQFiEKaJxxCLB3_AKK7paiZUizR_XVukqrL0jsajjCtqczT5A"/>
+</div>
+</div>
+</nav>
+<main class="pt-32 pb-20 px-8 max-w-[1440px] mx-auto min-h-screen">
+<!-- Header Section -->
+<header class="mb-12">
+<h1 class="text-4xl font-extrabold tracking-tight text-on-surface mb-2">Order History</h1>
+<p class="text-on-surface-variant max-w-2xl">Review your past acquisitions and track currently active shipments from our curated galleries.</p>
+</header>
+<!-- Status Filter Tabs -->
+<div class="flex flex-wrap gap-3 mb-10 overflow-x-auto pb-2">
+<button class="px-6 py-2.5 rounded-full bg-primary-container text-on-primary-container font-semibold text-sm transition-all shadow-sm">
+                All Orders
+            </button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all text-sm font-medium">
+                Pending
+            </button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all text-sm font-medium">
+                Paid
+            </button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all text-sm font-medium">
+                Shipped
+            </button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all text-sm font-medium">
+                Completed
+            </button>
+<button class="px-6 py-2.5 rounded-full bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high transition-all text-sm font-medium">
+                Cancelled
+            </button>
+</div>
+<!-- Orders Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+<!-- Order Card 1: Shipped -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_12px_40px_rgba(44,52,54,0.06)] flex flex-col md:flex-row gap-6 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="w-full md:w-32 h-32 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Modern abstract oil painting with vibrant strokes of emerald green and gold, contemporary art museum style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAYvIkezl66gv-ZFnxGxVj83Hckoje1ufIV7omO23dD7AuLbT9wlgaBPRvL8q1jjeC48uJTwo8dzqUZ4lejPzFaU9eo7nEaUTlA2AIbPOezs-9Lg3lnTA6umlQp8OgvKu4IT76mrG8y1j0fsOBCVOceN-BoE1c_zCKmKfxW2Pwiylf9AurbXQA1n-9Da92N7kttxhEAp1ucPiGPkK8SsH74QNjJTEr29i34lNCQeR2bbCb1XIJ7p9ZrtOZ4aEeKmNsTB5TQoBhK05c"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-bold text-lg text-on-surface">Order #CC-84920</h3>
+<p class="text-xs text-on-surface-variant font-medium">Placed on Oct 24, 2023</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-tertiary-container text-on-tertiary-container text-[10px] font-bold uppercase tracking-wider">
+                                Shipped
+                            </span>
+</div>
+<p class="text-sm text-on-surface-variant mt-2">The Emerald Fragment - Limited Edition Print + 2 others</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-4 border-t border-surface-container-low">
+<span class="text-xl font-bold text-primary">$1,240.00</span>
+<button class="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-dim transition-colors">
+                            View Detail
+                            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Order Card 2: Completed -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_12px_40px_rgba(44,52,54,0.06)] flex flex-col md:flex-row gap-6 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-zinc-300"></div>
+<div class="w-full md:w-32 h-32 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Sleek minimalist ceramic vase on a white plinth, soft shadows and clean lines, high-end interior design catalog" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjY5VXHOQ5LjB-T_0Gv4TFRj_F8sXjLeBwQ2x4yBhKMWJ9Pu3DlpYav8QDJ2pk7SimEbSFDS1Ej9EfBgHIDA-IcOD3Nin11enWvvyhwXb7izMAW88IwcQGyRE5gLPIbEhlW9DjKCy8pz8jbQ9DqWR_dHiR5e9M7aeUgbD0nxsxrztk_Et3a1xUWLSYZm7qNpcjmb--E7Z1yQRL9U54Ppp7AYYZvRzkZH3kOhd8J5JZRUFfzMHHSipziI5DSJaTfPW07M3TRQX6Akk"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-bold text-lg text-on-surface">Order #CC-84811</h3>
+<p class="text-xs text-on-surface-variant font-medium">Placed on Oct 12, 2023</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">
+                                Completed
+                            </span>
+</div>
+<p class="text-sm text-on-surface-variant mt-2">Nordic Stoneware Collection (Full Set)</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-4 border-t border-surface-container-low">
+<span class="text-xl font-bold text-primary">$450.00</span>
+<button class="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-dim transition-colors">
+                            View Detail
+                            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Order Card 3: Pending -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_12px_40px_rgba(44,52,54,0.06)] flex flex-col md:flex-row gap-6 relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-1 h-full bg-tertiary"></div>
+<div class="w-full md:w-32 h-32 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Digital art installation featuring flowing 3D shapes in shades of deep teal and chrome, futuristic aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5KloplWfVXMVT1C5Cy9I6Gd0Q8eT7bo_H0MuAPiyRqw8Be9VHP9gVgZBa1hf4dlyOSjMg1wShTc1GXiyPTXxiaZNwqtDUh90HsdQNqllPkxNYjXYYQ_1y9lMKTsaEUCeCbOG3tA-_jNYPvU-_IE_c_OttCV5XFOVEidyuzEIapxCmWt_yhBeufIrQ0ZxR13O1YfGc8XnaBqIAfCCP3E2cI0j9eDTlIwU9Uwfwcc92Vx_zTywQo5BNHtmHYK3VichNQ1m4pCnr_4M"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-bold text-lg text-on-surface">Order #CC-85004</h3>
+<p class="text-xs text-on-surface-variant font-medium">Placed on Oct 28, 2023</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-tertiary-fixed-dim text-on-tertiary-fixed text-[10px] font-bold uppercase tracking-wider">
+                                Pending
+                            </span>
+</div>
+<p class="text-sm text-on-surface-variant mt-2">Chrome Fluid Sculptures Vol. 1</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-4 border-t border-surface-container-low">
+<span class="text-xl font-bold text-primary">$2,800.00</span>
+<button class="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-dim transition-colors">
+                            View Detail
+                            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Order Card 4: Cancelled -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-[0_12px_40px_rgba(44,52,54,0.06)] flex flex-col md:flex-row gap-6 relative overflow-hidden group opacity-70">
+<div class="absolute top-0 left-0 w-1 h-full bg-error"></div>
+<div class="w-full md:w-32 h-32 flex-shrink-0 bg-surface-container-low rounded-lg overflow-hidden grayscale">
+<img class="w-full h-full object-cover" data-alt="Handcrafted leather designer chair with wooden frame, focus on texture and craftsmanship, studio lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCNOaMVzMz4z0hFHuRvu0s7G1zABFtbPryhC8H3hvCtusMAeYqVggGfo87SfqXvdQEE0qZMy0NWmIpjmjW9fqZ1LG2aSU6m81b2oWIk5md3RXLnFAfnbydxQOXaBB0eLmAdWWbL8VsRSlJm-7l36_lyPaK3DWwvMoBXsx9PqyuM1w7maxGTRn7R8jGYzNm4Jh0RvHdDM_XhlkajBZB4AGOM3aKrUJ0L9gphX2aSbq2zA9oELBFJMqQFsEbIczY2RGdIAIucGHDuo9Q"/>
+</div>
+<div class="flex-grow flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-2">
+<div>
+<h3 class="font-bold text-lg text-on-surface">Order #CC-84209</h3>
+<p class="text-xs text-on-surface-variant font-medium">Placed on Sep 15, 2023</p>
+</div>
+<span class="px-3 py-1 rounded-full bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-wider">
+                                Cancelled
+                            </span>
+</div>
+<p class="text-sm text-on-surface-variant mt-2">Artisan Leather Lounge Chair (Cognac)</p>
+</div>
+<div class="flex items-center justify-between mt-6 pt-4 border-t border-surface-container-low">
+<span class="text-xl font-bold text-on-surface-variant">$1,850.00</span>
+<button class="flex items-center gap-2 text-sm font-bold text-on-surface-variant hover:text-on-surface transition-colors">
+                            View Detail
+                            <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination / Load More -->
+<div class="mt-16 flex justify-center">
+<button class="px-10 py-4 bg-primary text-on-primary font-bold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 active:scale-95 bg-gradient-to-br from-primary to-primary-dim">
+                Load Older Orders
+            </button>
+</div>
+</main>
+<!-- Footer from Shared Components -->
+<footer class="bg-zinc-100 dark:bg-zinc-950 w-full py-12 px-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-[1440px] mx-auto font-inter text-xs tracking-wide">
+<div class="col-span-1 md:col-span-1">
+<div class="text-lg font-bold text-zinc-900 dark:text-zinc-50 mb-4">The Curated Canvas</div>
+<p class="text-zinc-500 dark:text-zinc-400 mb-6 max-w-xs">Elevating commerce to a gallery experience. Curating the finest artistic pieces for the modern enthusiast.</p>
+</div>
+<div class="flex flex-col space-y-3">
+<h4 class="font-bold text-zinc-900 dark:text-zinc-50 mb-2 uppercase tracking-widest text-[10px]">Shop</h4>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">About Us</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">Shipping Policy</a>
+</div>
+<div class="flex flex-col space-y-3">
+<h4 class="font-bold text-zinc-900 dark:text-zinc-50 mb-2 uppercase tracking-widest text-[10px]">Legal</h4>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">Terms of Service</a>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">Privacy</a>
+</div>
+<div class="flex flex-col space-y-3">
+<h4 class="font-bold text-zinc-900 dark:text-zinc-50 mb-2 uppercase tracking-widest text-[10px]">Support</h4>
+<a class="text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-opacity opacity-80 hover:opacity-100" href="#">Contact</a>
+<div class="pt-4">
+<p class="text-zinc-400 dark:text-zinc-600">© 2024 The Curated Canvas. All rights reserved.</p>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

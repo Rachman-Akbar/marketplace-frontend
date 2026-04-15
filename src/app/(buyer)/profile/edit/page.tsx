@@ -1,29 +1,39 @@
-import { PageWrapper } from "@/components/layout/PageWrapper";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { SectionTitle } from "@/components/ui/SectionTitle";
-
 export default function EditProfilePage() {
   return (
-    <PageWrapper>
-      <SectionTitle title="Edit Profile" subtitle="Update your personal details and public buyer identity." />
-      <Card className="space-y-5">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input value="Julian" readOnly />
-          <Input value="Thorne" readOnly />
+    <div className="mx-auto max-w-5xl space-y-8">
+      <header>
+        <h1 className="text-5xl font-extrabold tracking-tight">Edit Profile</h1>
+        <p className="mt-2 text-slate-500">Update your personal details and public buyer identity.</p>
+      </header>
+
+      <div className="rounded-xl bg-white p-8 shadow-sm">
+        <h2 className="mb-6 text-2xl font-extrabold tracking-tight">Personal Details</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-600">First Name</label>
+            <input className="w-full rounded-lg bg-slate-200 px-4 py-3" defaultValue="Julian" />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-slate-600">Last Name</label>
+            <input className="w-full rounded-lg bg-slate-200 px-4 py-3" defaultValue="Thorne" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-600">Email Address</label>
+            <input className="w-full rounded-lg bg-slate-200 px-4 py-3" defaultValue="julian.thorne@canvas.co" />
+          </div>
+          <div className="md:col-span-2">
+            <label className="mb-2 block text-sm font-semibold text-slate-600">Bio</label>
+            <textarea
+              className="min-h-32 w-full rounded-lg bg-slate-200 px-4 py-3"
+              defaultValue="Art director and minimalist furniture collector. Obsessed with natural materials and Bauhaus principles."
+            />
+          </div>
         </div>
-        <Input value="julian.thorne@canvas.co" readOnly />
-        <textarea
-          className="min-h-32 w-full rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700"
-          value="Art director and minimalist furniture collector. Obsessed with natural materials and Bauhaus principles."
-          readOnly
-        />
-        <div className="flex justify-end gap-3">
-          <Button variant="ghost">Discard</Button>
-          <Button>Save Changes</Button>
+        <div className="mt-6 flex justify-end gap-3">
+          <button className="rounded-lg px-5 py-2 font-semibold text-slate-600">Discard</button>
+          <button className="rounded-lg bg-emerald-700 px-6 py-2.5 font-bold text-white">Save Changes</button>
         </div>
-      </Card>
-    </PageWrapper>
+      </div>
+    </div>
   );
 }

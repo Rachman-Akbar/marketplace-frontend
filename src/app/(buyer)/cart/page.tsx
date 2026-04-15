@@ -2,11 +2,6 @@ export default function CartPage() {
   return (
     <div className="grid gap-10 lg:grid-cols-12">
       <section className="space-y-5 lg:col-span-8">
-        <header className="mb-8">
-          <h1 className="text-6xl font-extrabold tracking-tight">Your Collection</h1>
-          <p className="mt-2 text-slate-500">Review your curated selections before final acquisition.</p>
-        </header>
-
         <div className="rounded-xl bg-white p-6 shadow-sm">
           <div className="flex items-center gap-5">
             <img className="h-28 w-28 rounded-lg object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDd0I3Eao7oicd53MD0FkiF4Spksmusf2eaigqbHVn9okWDqYapzAXsXw3x_3QR94ZM91jDWCoqLNSrZuEyWx_aUVg2_JKbVgTYh2By4HSFAWLDvWL7oMj3Ky81JBEPKsGGE2noCefwyV4dgddBiM1G3KvTcFU5NivSpC4Vg_PFPKoi34Pgj4s_DZ9ObzNltNHL3CzHFN8dS5J6qvNaS0lyKmka5r4zRhtnOQ5SHW4YNTG2vl5Z7lqM7TWlE9EYkU52W5ePVLnpXnQ" alt="item1" />

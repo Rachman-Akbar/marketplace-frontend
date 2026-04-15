@@ -93,14 +93,7 @@ export default function BuyerHomePage() {
       <section className="mx-auto max-w-[1440px]">
         <div className="mb-8 flex items-center justify-between">
           <h2 className="text-4xl font-extrabold tracking-tight">Recommended For You</h2>
-          <div className="flex gap-2">
-            <button className="rounded-full border border-slate-300 p-2">
-              <span className="material-symbols-outlined">chevron_left</span>
-            </button>
-            <button className="rounded-full border border-slate-300 p-2">
-              <span className="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
+          <button className="flex items-center gap-2 font-bold text-emerald-700">Explore All</button>
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {productCards.slice(0, 4).map((product) => (

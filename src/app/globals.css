@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --color-canvas: #f2f5f4;
+  --color-canvas: #ffffff;
   --color-panel: #ffffff;
   --color-brand: #0a7a4a;
   --color-brand-deep: #075e39;
@@ -11,12 +11,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-canvas: #0f1515;
-    --color-panel: #111a1a;
+    --color-canvas: #ffffff;
+    --color-panel: #ffffff;
     --color-brand: #46d08a;
     --color-brand-deep: #2bb273;
-    --color-text: #e4ecec;
-    --color-muted: #98aaaa;
+    --color-text: #142322;
+    --color-muted: #647170;
   }
 }
 
@@ -31,7 +31,7 @@ body {
   background: var(--color-canvas);
   color: var(--color-text);
   font-family: var(--font-manrope), sans-serif;
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 .material-symbols-outlined {

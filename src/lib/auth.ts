@@ -85,7 +85,7 @@ async function postAuth<T>(endpoint: string, body: Record<string, unknown>): Pro
   throw lastError instanceof Error ? lastError : new Error("Auth request failed");
 }
 
-async function authRequest<T>(
+export async function authRequest<T>(
   endpoint: string,
   init: RequestInit & { token?: string } = {},
 ): Promise<T> {

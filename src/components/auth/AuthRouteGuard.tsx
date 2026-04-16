@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { getVerifiedAuthSession } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 type AuthRouteGuardProps = {
   children: ReactNode;
@@ -19,55 +19,35 @@ function isProtectedPath(pathname: string): boolean {
 export function AuthRouteGuard({ children }: AuthRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isReady, setIsReady] = useState(true);
+  const { backendSession: session, isLoading } = useAuth();
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    let mounted = true;
+    if (isLoading) return;
 
-    async function runGuard() {
-      const guestOnly = isGuestOnlyPath(pathname);
-      const protectedRoute = isProtectedPath(pathname);
+    const guestOnly = isGuestOnlyPath(pathname);
+    const protectedRoute = isProtectedPath(pathname);
 
-      if (!guestOnly && !protectedRoute) {
-        if (mounted) {
-          setIsReady(true);
-        }
-
-        return;
-      }
-
-      if (mounted) {
-        setIsReady(false);
-      }
-
-      const session = await getVerifiedAuthSession();
-
-      if (!mounted) {
-        return;
-      }
-
-      if (protectedRoute && !session) {
-        router.replace("/login");
-        return;
-      }
-
-      if (guestOnly && session) {
-        router.replace("/");
-        return;
-      }
-
+    if (!guestOnly && !protectedRoute) {
       setIsReady(true);
+      return;
     }
 
-    runGuard();
+    if (protectedRoute && !session) {
+      router.replace("/login");
+      return;
+    }
 
-    return () => {
-      mounted = false;
-    };
-  }, [pathname, router]);
+    if (guestOnly && session) {
+      router.replace("/");
+      return;
+    }
+
+    setIsReady(true);
+  }, [pathname, session, isLoading, router]);
 
   if (!isReady) {
-    return null;
+    return <div>Loading...</div>; // Simple loader
   }
 
   return <>{children}</>;

@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Container } from "@/components/layout/Container";
-import { AUTH_SESSION_CHANGED_EVENT, getVerifiedAuthSession } from "@/lib/auth";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { href: "/categories", label: "Categories" },
@@ -13,48 +12,9 @@ const navItems = [
 ];
 
 export function Header() {
-  const pathname = usePathname();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadAuthState() {
-      if (mounted) {
-        setIsCheckingAuth(true);
-      }
-
-      const session = await getVerifiedAuthSession();
-      if (!session) {
-        if (mounted) {
-          setIsLoggedIn(false);
-          setIsCheckingAuth(false);
-        }
-
-        return;
-      }
-
-      if (mounted) {
-        setIsLoggedIn(true);
-        setIsCheckingAuth(false);
-      }
-    }
-
-    function handleAuthSessionChanged() {
-      void loadAuthState();
-    }
-
-    loadAuthState();
-    window.addEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
-    window.addEventListener("storage", handleAuthSessionChanged);
-
-    return () => {
-      mounted = false;
-      window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
-      window.removeEventListener("storage", handleAuthSessionChanged);
-    };
-  }, [pathname]);
+  const { backendSession, isLoading } = useAuth();
+  const isLoggedIn = !!backendSession;
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-[0_10px_30px_rgba(44,52,54,0.05)]">
@@ -102,7 +62,7 @@ export function Header() {
               <span className="material-symbols-outlined">chat</span>
             </Link>
 
-            {!isCheckingAuth && isLoggedIn ? (
+            {!isLoading && isLoggedIn ? (
               <>
                 <Link
                   href="/profile"
@@ -114,7 +74,7 @@ export function Header() {
               </>
             ) : null}
 
-            {!isCheckingAuth && !isLoggedIn ? (
+            {!isLoading && !isLoggedIn ? (
               <>
                 <Link
                   href="/login"

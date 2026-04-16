@@ -1,48 +1,23 @@
-import Link from "next/link";
+import { fetchAPI } from "@/lib/api";
+import { ProductCard } from "@/components/ui/ProductCard";
 
-const vouchers = [
-  { title: "10% Off", subtitle: "Min. spend $50.00", cta: "Claim" },
-  { title: "$5 Voucher", subtitle: "No min. spend required", cta: "Claim" },
-  { title: "Free Gift", subtitle: "With any ceramics order", cta: "Copy Code" },
-  { title: "15% Off", subtitle: "New subscriber exclusive", cta: "Claim" },
-];
+type StoreProduct = {
+  id: number;
+  slug: string;
+  name: string;
+  price: number;
+  stock?: number;
+  thumbnail?: string | null;
+};
 
-const products = [
-  {
-    title: "Artisan Clay Table Vase",
-    price: "$45.00",
-    sold: "540 sold",
-    rating: "(142)",
-    badge: "Top Seller",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCywA1ZpBLhvFvelMGIEGFqxDHCjIQQxMcImEw0Qps2UFfyvk7q3foO2xu7gGxCjvkRXVpJsIMHFOfnb_kBWgNBxgOYVRrSb66BJ73XVHETEmpzQ2VakzbovX2dEl3lRKkWQWE4ffJqdyzQLfGrGwnUH_7rMZjjP5CjJeYVv_6r6keaU6QV4AwqC9C5bvzAVT_W29aJ8-rfNdOfI1uAVsv7L6BVzEka52KAF0iAK6qOdfRloQbCe0uW3_p5gsgJn-SusypO0IT9ZAE",
-  },
-  {
-    title: "Sustainable Soy Candle",
-    price: "$22.00",
-    sold: "210 sold",
-    rating: "(89)",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuB6fxXTYmUuJP0ntZ58yeZj6FSfSTm493mWVnm9SpiiFvj4gGkZljPcluk8ch_S2F7Vh_Rdyraokn5alSRqLvFnvFLDcJmMBuHsyCBCGs-Uy308H2Di758_L4X82-eoz9_dayurELVZ6LWjSpOYzDdhA5OU_Rq8GYiyBCheM69Fnyw4jhPhA5HCiB_y7uM1ur9pBlOvtgQ6K9hT1JHCWrRCZg6ESK2lZSfcgD5mMzNm8UoRRQZVXI24qHt2slCG5zGTt06AY8wEe9s",
-  },
-  {
-    title: "Woven Seagrass Basket",
-    price: "$38.50",
-    sold: "1,100 sold",
-    rating: "(256)",
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD9t8aQUWXW-Q2AMm--Sm7PGLW2EFxhzhsfx1dI56GAlNIkNTnIE3JbhryrFT2uxYVqATTcwXlwMezk-HkZcWfh906s1AQ-QJ6uVetBzatYBRlSPmDGQtH799UhtTo7ozBe52xsonM6PjftGTw1oP_ANd49mN6pzbqGblGXnMMum-61npDhoZgwl9p5gK7YP-_SmBpgdc6bSuLw_wJl8LUdwhDBI4iA0ifpefyQF5ApBIk75iES5O_9dw4MIX2Wtqeezr5uG1rtr6c",
-  },
-];
-
-const gallery = [
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDk-BLRbMsl-jsp5r9aL-IX30KWwgIpFDwHrI7ilfDUbSRTLBYRn4xy8Qy_uH-giNd9gFTtdI9pjbf1JuZJ2F-dbk4u3IRJwb2Vh_zePdm0XiuMbns7YSfXYvgkRUXRva5DYj9cqRPnqTBMucs61H39nIrKvGyGsdX52X3W0gAgIf1qtZWVogOcXQChPLVBvI0JwlIXdLPfZWjwabfl1_tpfa2hPj0E-0J8TZOlfZtrA0mFgid94QDS-m9VMQn-SvOFv34JDC2rTKU",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBW87yOtaBr86V-uXWkoeP9KhbYL6NAeGRGB1sCxv8xZCOR0BONR84-7B4XqL6FWORP7nmz_Chi1GzAn29wke0rfTlXUvP27ToMGegqnRqbP7K5vewflBJr9H3Q3ILt1xgt5hsruahgu3ElSwBNj4JzRg8eNtAIHI-lC42EuH1CBf89A_bNErQw-Le4sqeamlXW2-kCNW_ooSG6K7yYloAH1GsnryXW4lGRJYvL_akkQWTLT3jPj9yxjTwa_AWgUIZ4kbkFKxBKr_Y",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuDyHdhwegqnRxN_B236jA5oyi2h_jjOI0MIp979J3tnUEDa0LzBJJCGdWHAH55SdtoE0NpkEATN8GoBa3y90LWL5-0DqWCcPv3qqfxzBjmjaBHXTOpua7rw1wCZ5ZIwvpEDLF7Li5WM5Z8FQI0RbqaNXtAHccep3j3pzXabmolDqz9pTfHMk8ZV-SyPZ-nh13vyPRHE1vDjwZl5MfUYIStzb7nT3PU7EzXMniV123C0IQYMOk5yiB7QpD2EDnhptLfrTUNe6mloJRI",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuC-EcRRh-f4JoyR-Mf9gSij9d3c7mRLzxvyRvvm5CQzS_lLpbWv5yVEZKkU5SyfvMPvh4Ed3gpLXZ8U5wLz3t3tB8-uNwZb-63FyhBSyBRXf7D-WM7XHGQ79Uwo1X0VuS5jqkvxVM_dclD5lDyhMxdI7fH-ZYyAiCgKC4afWURHyHzXAelBI8vy6O0CzFwfUld9YdIzlbi_PMZCo-ZIhypGmslvpBFMBm6VBwJMMkpHsSLGTqYTqchCzI62JgyfHm3Wx3WUbdcXka4",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuCYcds42-bkADYkHmnO7b3wBg7_CkpBUjdzyZqP6ThNcKXN1DaD_P8VGPoyRWDKBOVgZbVVxFcJpaSYei5gPP0t_ZTcCWpfBzftxEWz3etl4mi-GosmmLWE6dWRTISkKMnxlRfzFDJAyaCxa7iX5sv1rfgsvkkCf4aMBQkDauA_EEU_94oaXwAbs241Wx_r3-Mjo0W7Sm34tabbDKaH-FMwCrRtzLIyPeD4hYvKXusAPPRE5rusFYfsGKPgTj6m6KqAtzzHqOUIjvs",
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuBb-HoJLSHdUTf3MM42SBbNbTGKA3xpklezYn88jsWzMs6bm05nB2FJpmVGTWBssA83iro73WqLEg9SlW0MHNunniA7CT0t6thl8xgcDihLs3KrfK8trEL26V0Zlf3D_y37q-CsSQfesljZ8MyMCCjTXS-xRDVhk9tQU_IsCyoTr6_OtgG99TVKXsxkNJDNJX9Wx42vwWjCpSRjyrPARh62id7sjYocd2r-9XwZAlnIJh7JkQSqligI5idZ11HJe1QSzz7EBe0k4SI",
-];
+type StoreDetail = {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string | null;
+  logo?: string | null;
+  products?: StoreProduct[];
+};
 
 type StorePageProps = {
   params: Promise<{ slug: string }>;
@@ -50,7 +25,31 @@ type StorePageProps = {
 
 export default async function SellerStorePage({ params }: StorePageProps) {
   const { slug } = await params;
-  const storeName = slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  let storeName = slug.replace(/-/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+  let storeProducts: StoreProduct[] = [];
+  let storeLogo: string | null = null;
+
+  try {
+    const store = await fetchAPI<StoreDetail>(`/stores/${slug}`);
+    storeName = store.name;
+    storeProducts = store.products ?? [];
+    storeLogo = store.logo ?? null;
+  } catch {
+    storeProducts = [];
+  }
+
+  const vouchers = [
+    {
+      title: `${storeProducts.length} Products`,
+      subtitle: "Data voucher belum tersedia dari API",
+      cta: "Browse",
+    },
+  ];
+
+  const gallery = storeProducts
+    .map((product) => product.thumbnail)
+    .filter((thumbnail): thumbnail is string => Boolean(thumbnail))
+    .slice(0, 6);
 
   return (
     <div className="space-y-12 rounded-[28px] bg-white px-4 pb-16 pt-4 md:px-6 md:pt-6 lg:px-8">
@@ -68,7 +67,7 @@ export default async function SellerStorePage({ params }: StorePageProps) {
           <div className="h-28 w-28 overflow-hidden rounded-xl border-2 border-white bg-white p-1 shadow-lg md:h-36 md:w-36">
             <img
               className="h-full w-full rounded-lg object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBERR7t2FqSZvYVpIX1PdHdjULpgoSLXoSz6NpnU1ibuEgKTgSB0zmYYe2HrOQGrhRrqlBDezIa3N4qpDPrrRV5dGRrbRRAFvZzkaRCs--uin640494hbdU72I6bXYBtJLsbMXzQ9un-zSXqXahK7qE_7_CdKy52_7ajvMmcCL04m5YRQwIuXir3_sdy9Mh1bHcbGTxw8zjxGu3qIpz4Yi1gxUteeAnBK3V8I6WxM7cJmbfHN9wlM8Jy67skQIBXiJ2Lf_xa35gm2c"
+              src={storeLogo ?? "https://via.placeholder.com/300x300?text=Store"}
               alt="Store Profile"
             />
           </div>
@@ -160,31 +159,18 @@ export default async function SellerStorePage({ params }: StorePageProps) {
             </select>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <article key={product.title} className="group overflow-hidden rounded-xl bg-white shadow-[0_12px_40px_rgba(44,52,54,0.06)]">
-                <div className="relative h-64 overflow-hidden">
-                  <img className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" src={product.image} alt={product.title} />
-                  {product.badge ? (
-                    <span className="absolute left-3 top-3 rounded-md bg-slate-900 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-                      {product.badge}
-                    </span>
-                  ) : null}
-                </div>
-                <div className="p-5">
-                  <h4 className="font-bold text-slate-800 group-hover:text-slate-900">{product.title}</h4>
-                  <p className="mt-1 text-xs font-medium text-slate-500">{product.rating}</p>
-                  <div className="mt-4 flex items-end justify-between">
-                    <div>
-                      <p className="text-2xl font-extrabold text-slate-900">{product.price}</p>
-                      <p className="text-[10px] text-slate-500">{product.sold}</p>
-                    </div>
-                    <Link href="/products/emerald-tide-vessel" className="text-xs font-bold text-slate-700">
-                      View
-                    </Link>
-                  </div>
-                </div>
-              </article>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">
+            {storeProducts.map((product, index) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                title={product.name}
+                image={product.thumbnail ?? "https://via.placeholder.com/900x900?text=No+Image"}
+                price={product.price}
+                metaText={storeName}
+                soldText={typeof product.stock === "number" ? `Stock ${product.stock}` : undefined}
+                href={`/products/${product.slug}`}
+              />
             ))}
           </div>
         </div>

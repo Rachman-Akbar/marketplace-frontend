@@ -1,7 +1,76 @@
 import { ProductCard } from "@/components/ui/ProductCard";
-import { productCards } from "@/lib/mock-data";
+import { fetchAPI } from "@/lib/api";
 
-export default function BuyerHomePage() {
+type Category = {
+  id: number;
+  name: string;
+  slug: string;
+  products_count?: number;
+};
+
+type Product = {
+  id: number;
+  name: string;
+  slug: string;
+  price: number;
+  stock?: number;
+  category?: {
+    name?: string;
+  };
+  thumbnail?: string | null;
+  images?: Array<{
+    image_url?: string | null;
+    url?: string | null;
+    is_primary?: boolean;
+  }>;
+  store?: {
+    name?: string;
+  };
+};
+
+function resolveImage(product: Product): string {
+  if (product.thumbnail) {
+    return product.thumbnail;
+  }
+
+  const primary = product.images?.find((image) => image.is_primary);
+  const fallback = primary ?? product.images?.[0];
+
+  return fallback?.image_url ?? fallback?.url ?? "https://via.placeholder.com/900x900?text=No+Image";
+}
+
+const categoryImageTiles = [
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuCbBj6xWQ9bmkB5pYDh2QJdJKebhAfKAEzN6VGZWmRvPlvDsFz7NiCAYYYB4AYoW20AiVWRxQlPGoML95gvWjnHbYIc5Jer7KaK1GGUuwF1n01Pp-o1DNkElboC4KAVV9BBui8JIapRmboVeawTYoSV7NWTl9rNG8lDLwePYQ8XDL1SUOnVM8Tftek8h-txsGjNk2QXQQUHd_r_BzyhH3FgT9mJA5iEEJrnqAfz-JTaJs_8BxlV4BE5jxG7ckWJG1k1LBd3GBAi8PU",
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuBp-MEnNZ4yhEJZ01ROmIugzvOgITKdgHTl8zZQ0yjXS_xjhA99sSEWzgu33CYY7ixbl6lzlL8onuYk_TN1Z5jJy35AS1x8m2r3LejCvlqf367x4jLMNW-af3JvDMN_lEaOpwwkxhQi2CXXtpi7q369gTW6rhJ6IiW-BnWhh8oQ-REWKUKzrBubZBTPdo7JvGLbNaiEXB6mub_-6YTOcr7kBuia3LsBj3jj6Dr6Ri1bAPhxHb252B7GsQosSraJzkKl1totfiISfWU",
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuBeG6fzqaxDByGBM4B37w623RZQbgRWTSwQ1tIpp81ce_F0xicfAvpl1U2KY9lkVcxW2iKoszLMwLHBu5qf7N-5SqQ49HDarPk_5GTOw0eInYbw6CzyB3NQAgPlJH7AhYFLpv3wlUklZROg2qqnRRHXmpLNn8VQpuU0b1UzrjUYa82vi6XYHrp-gUPpSniKSYR8DwnJMKl7Tqa67QbRYkI1rC1BF7T9DYIAep1uD6dCjmNF4dqpymKBh6V-GDG9IwWTa_dP7MIcvuo",
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuAuXe4Boqu3wvbLbhQDsMKbYv_gk87rvPeiafIzLLsj8OZvIbKgw6g53_JGJyl9WywO92avgTwmPJWRXtOCrcEfZYDOY2OCa2iFhr6UXcXWo35yAwYTD93FvYuuFbw3djemq0KU_Idm1DJXOt6xrP1TOKIqB2VaUblS9hBjafmWuWL0cd-TOAcnOkTgldugkRl1ft6ebJqIbBqNAqS1ADySq2KH7hL8SwBcKjkI2T_REQrzbOXwDu1NsMeczjjfVmhqRVySEv6WKaQ",
+];
+
+export default async function BuyerHomePage() {
+  let products: Product[] = [];
+  let categories: Category[] = [];
+
+  try {
+    [products, categories] = await Promise.all([
+      fetchAPI<Product[]>("/products"),
+      fetchAPI<Category[]>("/categories"),
+    ]);
+  } catch {
+    products = [];
+    categories = [];
+  }
+
+  const featuredCategories = categories.slice(0, 4);
+  const recommendedProducts = products.slice(0, 16).map((product, index) => ({
+    id: product.id,
+    title: product.name,
+    image: resolveImage(product),
+    price: product.price,
+    metaText: product.category?.name ?? product.store?.name ?? "",
+    soldText: typeof product.stock === "number" ? `Stock ${product.stock}` : undefined,
+    href: `/products/${product.slug}`,
+  }));
+
   return (
     <div className="space-y-16">
       <section className="mx-auto max-w-[1440px]">
@@ -37,34 +106,16 @@ export default function BuyerHomePage() {
           <button className="flex items-center gap-2 font-bold text-emerald-700">Explore All</button>
         </div>
         <div className="grid h-[640px] grid-cols-12 gap-5">
-          <div className="col-span-8 overflow-hidden rounded-xl">
-            <img
-              className="h-full w-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuCbBj6xWQ9bmkB5pYDh2QJdJKebhAfKAEzN6VGZWmRvPlvDsFz7NiCAYYYB4AYoW20AiVWRxQlPGoML95gvWjnHbYIc5Jer7KaK1GGUuwF1n01Pp-o1DNkElboC4KAVV9BBui8JIapRmboVeawTYoSV7NWTl9rNG8lDLwePYQ8XDL1SUOnVM8Tftek8h-txsGjNk2QXQQUHd_r_BzyhH3FgT9mJA5iEEJrnqAfz-JTaJs_8BxlV4BE5jxG7ckWJG1k1LBd3GBAi8PU"
-              alt="Living"
-            />
-          </div>
-          <div className="col-span-4 overflow-hidden rounded-xl">
-            <img
-              className="h-full w-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp-MEnNZ4yhEJZ01ROmIugzvOgITKdgHTl8zZQ0yjXS_xjhA99sSEWzgu33CYY7ixbl6lzlL8onuYk_TN1Z5jJy35AS1x8m2r3LejCvlqf367x4jLMNW-af3JvDMN_lEaOpwwkxhQi2CXXtpi7q369gTW6rhJ6IiW-BnWhh8oQ-REWKUKzrBubZBTPdo7JvGLbNaiEXB6mub_-6YTOcr7kBuia3LsBj3jj6Dr6Ri1bAPhxHb252B7GsQosSraJzkKl1totfiISfWU"
-              alt="Kitchen"
-            />
-          </div>
-          <div className="col-span-4 overflow-hidden rounded-xl">
-            <img
-              className="h-full w-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBeG6fzqaxDByGBM4B37w623RZQbgRWTSwQ1tIpp81ce_F0xicfAvpl1U2KY9lkVcxW2iKoszLMwLHBu5qf7N-5SqQ49HDarPk_5GTOw0eInYbw6CzyB3NQAgPlJH7AhYFLpv3wlUklZROg2qqnRRHXmpLNn8VQpuU0b1UzrjUYa82vi6XYHrp-gUPpSniKSYR8DwnJMKl7Tqa67QbRYkI1rC1BF7T9DYIAep1uD6dCjmNF4dqpymKBh6V-GDG9IwWTa_dP7MIcvuo"
-              alt="Workplace"
-            />
-          </div>
-          <div className="col-span-8 overflow-hidden rounded-xl">
-            <img
-              className="h-full w-full object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuXe4Boqu3wvbLbhQDsMKbYv_gk87rvPeiafIzLLsj8OZvIbKgw6g53_JGJyl9WywO92avgTwmPJWRXtOCrcEfZYDOY2OCa2iFhr6UXcXWo35yAwYTD93FvYuuFbw3djemq0KU_Idm1DJXOt6xrP1TOKIqB2VaUblS9hBjafmWuWL0cd-TOAcnOkTgldugkRl1ft6ebJqIbBqNAqS1ADySq2KH7hL8SwBcKjkI2T_REQrzbOXwDu1NsMeczjjfVmhqRVySEv6WKaQ"
-              alt="Wellness"
-            />
-          </div>
+          {["col-span-8", "col-span-4", "col-span-4", "col-span-8"].map((className, index) => (
+            <div key={`category-${index}`} className={`${className} group relative overflow-hidden rounded-xl`}>
+              <img className="h-full w-full object-cover" src={categoryImageTiles[index]} alt={featuredCategories[index]?.name ?? "Category"} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <h3 className="text-2xl font-extrabold tracking-tight">{featuredCategories[index]?.name ?? "Kategori"}</h3>
+                <p className="text-sm text-white/80">{featuredCategories[index]?.products_count ?? 0}+ Items</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -95,9 +146,9 @@ export default function BuyerHomePage() {
           <h2 className="text-4xl font-extrabold tracking-tight">Recommended For You</h2>
           <button className="flex items-center gap-2 font-bold text-emerald-700">Explore All</button>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {productCards.slice(0, 4).map((product) => (
-            <ProductCard key={product.title} {...product} />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {recommendedProducts.map((product) => (
+            <ProductCard key={product.id} {...product} />
           ))}
         </div>
       </section>

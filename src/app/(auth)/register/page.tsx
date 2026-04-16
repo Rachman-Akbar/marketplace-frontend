@@ -1,9 +1,56 @@
+"use client";
+
+import { FormEvent, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
+import { registerWithPassword, saveAuthSession } from "@/lib/auth";
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
+  const [agreeTerms, setAgreeTerms] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!agreeTerms) {
+      setError("Anda harus menyetujui Terms of Service dan Privacy Policy.");
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
+      setError("Konfirmasi password tidak sama.");
+      return;
+    }
+
+    setError(null);
+    setIsSubmitting(true);
+
+    try {
+      const session = await registerWithPassword({
+        name,
+        email,
+        password,
+        passwordConfirmation,
+      });
+      saveAuthSession(session);
+      router.push("/");
+      router.refresh();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Register gagal.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <Card className="w-full space-y-6 rounded-2xl p-8">
       <div className="space-y-2">
@@ -12,18 +59,67 @@ export default function RegisterPage() {
         <p className="text-sm text-slate-500">Build your buyer profile and discover crafted essentials.</p>
       </div>
 
-      <div className="space-y-4">
-        <label className="block text-sm font-semibold text-slate-700">Full Name</label>
-        <Input placeholder="Full name" />
-        <label className="block text-sm font-semibold text-slate-700">Email Address</label>
-        <Input placeholder="Email address" type="email" />
-        <label className="block text-sm font-semibold text-slate-700">Password</label>
-        <Input placeholder="Password" type="password" />
-        <label className="flex items-center gap-2 text-xs text-slate-500">
-          <input type="checkbox" defaultChecked /> I agree with Terms of Service and Privacy Policy
+      <form className="space-y-4" onSubmit={handleSubmit}>
+        <label className="block text-sm font-semibold text-slate-700" htmlFor="name">
+          Full Name
         </label>
-        <Button className="w-full">Create Account</Button>
-      </div>
+        <Input
+          id="name"
+          placeholder="Full name"
+          value={name}
+          onChange={(event) => setName(event.target.value)}
+          required
+        />
+        <label className="block text-sm font-semibold text-slate-700" htmlFor="email">
+          Email Address
+        </label>
+        <Input
+          id="email"
+          placeholder="Email address"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+        />
+        <label className="block text-sm font-semibold text-slate-700" htmlFor="password">
+          Password
+        </label>
+        <Input
+          id="password"
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+          minLength={8}
+        />
+        <label className="block text-sm font-semibold text-slate-700" htmlFor="password-confirmation">
+          Confirm Password
+        </label>
+        <Input
+          id="password-confirmation"
+          placeholder="Confirm password"
+          type="password"
+          value={passwordConfirmation}
+          onChange={(event) => setPasswordConfirmation(event.target.value)}
+          required
+          minLength={8}
+        />
+        <label className="flex items-center gap-2 text-xs text-slate-500">
+          <input
+            type="checkbox"
+            checked={agreeTerms}
+            onChange={(event) => setAgreeTerms(event.target.checked)}
+          />{" "}
+          I agree with Terms of Service and Privacy Policy
+        </label>
+        {error ? (
+          <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>
+        ) : null}
+        <Button className="w-full" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Creating account..." : "Create Account"}
+        </Button>
+      </form>
 
       <div className="relative py-1">
         <div className="h-px bg-slate-200" />
@@ -33,8 +129,12 @@ export default function RegisterPage() {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <button className="rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-700">Google</button>
-        <button className="rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-700">Apple</button>
+        <button className="rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-700" type="button">
+          Google
+        </button>
+        <button className="rounded-lg border border-slate-300 py-2.5 text-sm font-semibold text-slate-700" type="button">
+          Apple
+        </button>
       </div>
 
       <p className="text-center text-sm text-slate-500">

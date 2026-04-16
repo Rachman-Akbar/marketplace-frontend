@@ -1,5 +1,10 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Container } from "@/components/layout/Container";
+import { AUTH_SESSION_CHANGED_EVENT, getVerifiedAuthSession } from "@/lib/auth";
 
 const navItems = [
   { href: "/categories", label: "Categories" },
@@ -8,6 +13,49 @@ const navItems = [
 ];
 
 export function Header() {
+  const pathname = usePathname();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadAuthState() {
+      if (mounted) {
+        setIsCheckingAuth(true);
+      }
+
+      const session = await getVerifiedAuthSession();
+      if (!session) {
+        if (mounted) {
+          setIsLoggedIn(false);
+          setIsCheckingAuth(false);
+        }
+
+        return;
+      }
+
+      if (mounted) {
+        setIsLoggedIn(true);
+        setIsCheckingAuth(false);
+      }
+    }
+
+    function handleAuthSessionChanged() {
+      void loadAuthState();
+    }
+
+    loadAuthState();
+    window.addEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
+    window.addEventListener("storage", handleAuthSessionChanged);
+
+    return () => {
+      mounted = false;
+      window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
+      window.removeEventListener("storage", handleAuthSessionChanged);
+    };
+  }, [pathname]);
+
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/60 bg-white/80 backdrop-blur-xl shadow-[0_10px_30px_rgba(44,52,54,0.05)]">
       <Container className="py-4">
@@ -53,9 +101,35 @@ export function Header() {
             <Link href="/chat" className="rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-emerald-700">
               <span className="material-symbols-outlined">chat</span>
             </Link>
-            <Link href="/profile" className="rounded-full bg-emerald-50 p-2 text-emerald-700 transition hover:bg-emerald-100">
-              <span className="material-symbols-outlined">person</span>
-            </Link>
+
+            {!isCheckingAuth && isLoggedIn ? (
+              <>
+                <Link
+                  href="/profile"
+                  className="rounded-full bg-emerald-50 p-2 text-emerald-700 transition hover:bg-emerald-100"
+                  aria-label="Profile"
+                >
+                  <span className="material-symbols-outlined">person</span>
+                </Link>
+              </>
+            ) : null}
+
+            {!isCheckingAuth && !isLoggedIn ? (
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-full border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-full bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                >
+                  Register
+                </Link>
+              </>
+            ) : null}
           </div>
         </div>
       </Container>

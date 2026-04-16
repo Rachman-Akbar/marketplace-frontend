@@ -1,4 +1,62 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ProfileLogoutButton } from "@/components/auth/ProfileLogoutButton";
+import { type AuthUser, getVerifiedAuthSession } from "@/lib/auth";
+
+function splitName(fullName: string | null): { firstName: string; lastName: string } {
+  if (!fullName || !fullName.trim()) {
+    return { firstName: "", lastName: "" };
+  }
+
+  const chunks = fullName.trim().split(/\s+/);
+  const firstName = chunks[0] ?? "";
+  const lastName = chunks.length > 1 ? chunks.slice(1).join(" ") : "";
+
+  return { firstName, lastName };
+}
+
 export default function ProfileDashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadProfile() {
+      const session = await getVerifiedAuthSession();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!session) {
+        router.replace("/login");
+        return;
+      }
+
+      setUser(session.user);
+      setIsLoading(false);
+    }
+
+    loadProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, [router]);
+
+  const displayName = user?.name?.trim() || "User";
+  const email = user?.email ?? "-";
+  const avatarUrl = user?.avatar?.trim() || "https://ui-avatars.com/api/?background=047857&color=ffffff&name=User";
+  const { firstName, lastName } = useMemo(() => splitName(user?.name ?? null), [user?.name]);
+
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <div className="grid gap-8 lg:grid-cols-[260px_1fr]">
       <aside className="hidden rounded-xl bg-slate-100 p-4 lg:block">
@@ -11,18 +69,22 @@ export default function ProfileDashboardPage() {
       </aside>
 
       <section className="space-y-6">
+        <div className="flex items-center justify-end">
+          <ProfileLogoutButton />
+        </div>
+
         <div className="grid gap-6 md:grid-cols-3">
           <div className="rounded-xl bg-white p-6 shadow-sm md:col-span-2">
             <div className="flex items-center gap-5">
               <div className="relative">
-                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSK3Cs2WXVjGZAx3pGPTrFLuieBj89wY52Aj5dYqjPnFERKTmrGsLYnvonFD6MXfPPHHxHdPmMSx9Dn8C5O3Ce325sm8NUXMWcFmhPkxEZKeLvsnW3YMxMcs01zq5fWEXh099zo9GYNJckP83h_kUfmaql1SP4KDR3vXcG66Q_NUW8NElpRLr-gQajMh0QgJRgrUCZdempAgw3NdQ3qvsIdRhgUmYOclaBCL_zWQGmT1hS9uF_tw8VBbuTABZVfa1z-9g38KpGpOE" alt="avatar" className="h-24 w-24 rounded-full border-4 border-emerald-300 object-cover" />
+                <img src={avatarUrl} alt="avatar" className="h-24 w-24 rounded-full border-4 border-emerald-300 object-cover" />
                 <button className="absolute -bottom-1 -right-1 rounded-full bg-emerald-700 p-1.5 text-white">
                   <span className="material-symbols-outlined text-sm">edit</span>
                 </button>
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-4xl font-extrabold tracking-tight">Julian Thorne</h1>
+                  <h1 className="text-4xl font-extrabold tracking-tight">{displayName}</h1>
                   <span className="rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-emerald-700">Pro Member</span>
                 </div>
                 <p className="mt-1 text-slate-500">Curating aesthetics since Oct 2023</p>
@@ -60,15 +122,15 @@ export default function ProfileDashboardPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-600">First Name</label>
-                <input className="w-full rounded-lg bg-slate-200 px-4 py-3" value="Julian" readOnly />
+                <input className="w-full rounded-lg bg-slate-200 px-4 py-3" value={firstName} readOnly />
               </div>
               <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-600">Last Name</label>
-                <input className="w-full rounded-lg bg-slate-200 px-4 py-3" value="Thorne" readOnly />
+                <input className="w-full rounded-lg bg-slate-200 px-4 py-3" value={lastName} readOnly />
               </div>
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-600">Email Address</label>
-                <input className="w-full rounded-lg bg-slate-200 px-4 py-3" value="julian.thorne@canvas.co" readOnly />
+                <input className="w-full rounded-lg bg-slate-200 px-4 py-3" value={email} readOnly />
               </div>
               <div className="md:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-600">Bio</label>

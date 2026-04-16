@@ -1,4 +1,5 @@
 import { fetchAPI } from "@/lib/api";
+import { ProductFilterButton } from "@/components/filters/ProductFilterButton";
 import { ProductCard } from "@/components/ui/ProductCard";
 
 type ProductImage = {
@@ -16,13 +17,20 @@ type Product = {
   stock?: number;
   category?: {
     name?: string;
+    slug?: string;
   };
   thumbnail?: string | null;
   images?: ProductImage[];
 };
 
+type CategoryOption = {
+  id: number;
+  name: string;
+  slug: string;
+};
+
 type ProductsPageProps = {
-  searchParams?: Promise<{ category?: string }>;
+  searchParams?: Promise<{ category?: string; categories?: string; sort?: string }>;
 };
 
 function resolveImage(product: Product): string {
@@ -38,58 +46,66 @@ function resolveImage(product: Product): string {
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = searchParams ? await searchParams : undefined;
-  const category = params?.category;
+  const selectedCategories = params?.categories
+    ? params.categories
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : params?.category
+      ? [params.category]
+      : [];
+  const sort = params?.sort ?? "popularity";
   let items: Product[] = [];
+  let categories: CategoryOption[] = [];
 
   try {
-    items = await fetchAPI<Product[]>(category ? `/products?category=${encodeURIComponent(category)}` : "/products");
+    [items, categories] = await Promise.all([
+      fetchAPI<Product[]>("/products"),
+      fetchAPI<CategoryOption[]>("/categories"),
+    ]);
   } catch {
     items = [];
+    categories = [];
+  }
+
+  if (selectedCategories.length > 0) {
+    items = items.filter((item) => {
+      const slug = item.category?.slug;
+
+      return !!slug && selectedCategories.includes(slug);
+    });
+  }
+
+  if (sort === "price_asc") {
+    items = [...items].sort((a, b) => a.price - b.price);
+  } else if (sort === "price_desc") {
+    items = [...items].sort((a, b) => b.price - a.price);
+  } else if (sort === "name_asc") {
+    items = [...items].sort((a, b) => a.name.localeCompare(b.name));
+  } else if (sort === "newest") {
+    items = [...items].sort((a, b) => b.id - a.id);
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-      <aside className="hidden rounded-xl bg-slate-200/60 p-6 lg:block">
-        <h3 className="mb-4 text-2xl font-bold tracking-tight">Category</h3>
-        <div className="space-y-2 text-sm text-slate-700">
-          <label className="flex items-center gap-2"><input type="checkbox" /> Art &amp; Decor</label>
-          <label className="flex items-center gap-2"><input type="checkbox" defaultChecked /> Handcrafted Furniture</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Sustainable Textiles</label>
-          <label className="flex items-center gap-2"><input type="checkbox" /> Ceramics</label>
-        </div>
-        <h3 className="mb-3 mt-8 text-2xl font-bold tracking-tight">Price Range</h3>
-        <input type="range" className="w-full" defaultValue={45} />
-        <div className="mt-1 flex justify-between text-sm text-slate-500"><span>$0</span><span className="font-bold text-emerald-700">$450+</span><span>$1000+</span></div>
-        <button className="mt-7 w-full rounded-xl bg-emerald-700 py-3 font-bold text-white">Apply Filters</button>
-      </aside>
+    <section className="space-y-8">
+      <div className="flex justify-end">
+        <ProductFilterButton categories={categories} currentCategories={selectedCategories} currentSort={sort} />
+      </div>
 
-      <section>
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500">Search Results</p>
-            <h1 className="text-5xl font-extrabold tracking-tight">Handcrafted Essentials</h1>
-            <p className="mt-1 text-slate-500">{items.length} items found matching your preference</p>
-          </div>
-          <select className="rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold">
-            <option>Popularity</option>
-          </select>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          {items.map((item, index) => (
-            <ProductCard
-              key={item.id}
-              id={item.id}
-              title={item.name}
-              image={resolveImage(item)}
-              price={item.price}
-              metaText={item.category?.name ?? ""}
-              soldText={typeof item.stock === "number" ? `Stock ${item.stock}` : undefined}
-              href={`/products/${item.slug}`}
-            />
-          ))}
-        </div>
-      </section>
-    </div>
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        {items.map((item) => (
+          <ProductCard
+            key={item.id}
+            id={item.id}
+            title={item.name}
+            image={resolveImage(item)}
+            price={item.price}
+            metaText={item.category?.name ?? ""}
+            soldText={typeof item.stock === "number" ? `Stock ${item.stock}` : undefined}
+            href={`/products/${item.slug}`}
+          />
+        ))}
+      </div>
+    </section>
   );
 }

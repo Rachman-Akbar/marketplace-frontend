@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { signInWithPopup } from "firebase/auth";
-import { auth } from "@/lib/firebase/firebase";
+import { auth } from "@/lib/firebase";
 import { firebaseAuthService } from "@/lib/firebaseAuthService";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { loginWithPassword, saveAuthSession } from "@/lib/auth";
-import { googleProvider } from "@/lib/firebase/firebaseAuth";
+import { googleProvider } from "@/lib/firebaseAuth";
 
 export default function LoginPage() {
   const router = useRouter();

@@ -7,9 +7,8 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { registerWithPassword, saveAuthSession } from "@/lib/auth";
-import { createUserWithEmailAndPassword } from "firebase/auth";
 
-await createUserWithEmailAndPassword(auth, email, password);
+// Untuk register native, tidak perlu register ke Firebase. Jika ingin Google, gunakan tombol Google terpisah.
 
 export default function RegisterPage() {
   const router = useRouter();

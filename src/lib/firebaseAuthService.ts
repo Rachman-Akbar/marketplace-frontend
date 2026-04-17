@@ -1,7 +1,7 @@
 import { User } from 'firebase/auth';
 import { authRequest } from './auth';
 import { AuthResponse, AuthSession } from './auth';
-import { auth } from './firebase/firebase';
+import { auth } from './firebase';
 import { sendPasswordResetEmail, sendEmailVerification } from 'firebase/auth';
 
 export const firebaseAuthService = {

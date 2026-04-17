@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '@/lib/firebase/firebase';
+import { auth } from '@/lib/firebase';
 import { AuthSession, saveAuthSession, getVerifiedAuthSession, clearAuthSession, getAuthSession } from '@/lib/auth';
 import { firebaseAuthService } from '@/lib/firebaseAuthService';
 
@@ -44,12 +44,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // Listen to AUTH_SESSION_CHANGED_EVENT for manual logout (e.g. ProfileLogoutButton)
+    let prevSession = getAuthSession();
     function handleSessionChange() {
-      setBackendSession(getAuthSession());
-      // Show message if session benar-benar null (logout sukses)
-      if (!getAuthSession()) {
+      const currentSession = getAuthSession();
+      setBackendSession(currentSession);
+      // Hanya tampilkan alert jika sebelumnya ada session, lalu session menjadi null (benar-benar logout)
+      if (prevSession && !currentSession) {
         alert('Logout berhasil!');
       }
+      prevSession = currentSession;
     }
     window.addEventListener('ukomp:auth-session-changed', handleSessionChange);
 

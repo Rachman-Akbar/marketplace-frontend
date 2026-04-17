@@ -1,49 +1,36 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const DEFAULT_BASE_URLS = [
-  "http://localhost/UKOMP/market-api/public/api",
-  "http://127.0.0.1/UKOMP/market-api/public/api",
-  "http://localhost:8000/api",
-  "http://127.0.0.1:8000/api",
-];
+import axios from "axios";
 
-export type ApiEnvelope<T> = {
-  data: T;
-};
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://127.0.0.1:8000/api";
 
-export async function fetchAPI<T>(endpoint: string): Promise<T> {
-  const baseUrls = BASE_URL ? [BASE_URL] : DEFAULT_BASE_URLS;
-  const safeEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
-  let response: Response | null = null;
-  let lastError: unknown;
+export const api = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+  },
+});
 
-  for (const baseUrl of baseUrls) {
-    try {
-      response = await fetch(`${baseUrl.replace(/\/$/, "")}${safeEndpoint}`, {
-        cache: "no-store",
-        headers: {
-          Accept: "application/json",
-        },
-      });
+/**
+ * AUTO ATTACH TOKEN
+ */
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const session = localStorage.getItem("auth_session");
 
-      if (response.ok) {
-        break;
-      }
+    if (session) {
+      try {
+        const { api_token } = JSON.parse(session);
 
-      lastError = new Error(`Failed to fetch ${endpoint} (${response.status})`);
-    } catch (error) {
-      lastError = error;
+        if (api_token) {
+          config.headers.Authorization = `Bearer ${api_token}`;
+        }
+      } catch {}
     }
   }
 
-  if (!response || !response.ok) {
-    throw lastError instanceof Error ? lastError : new Error(`Failed to fetch ${endpoint}`);
-  }
+  return config;
+});
 
-  const payload = (await response.json()) as ApiEnvelope<T> | T;
-
-  if (typeof payload === "object" && payload !== null && "data" in payload) {
-    return (payload as ApiEnvelope<T>).data;
-  }
-
-  return payload as T;
-}
+export default api;

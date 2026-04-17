@@ -20,47 +20,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setFirebaseUser(user);
-      if (user) {
-        // Sync Firebase user to backend session
-        try {
-          const session = await firebaseAuthService.syncFirebaseToBackend(user);
-          if (session) {
-            saveAuthSession(session);
-            setBackendSession(session);
-          }
-        } catch (error) {
-          console.error('Firebase sync failed:', error);
-          // Keep Firebase state, but backend may be invalid
-        }
-      } else {
-        // No Firebase user -> clear backend session if invalid
-        clearAuthSession();
-        setBackendSession(null);
-      }
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    setFirebaseUser(user);
+
+    if (!user) {
+      clearAuthSession();
+      setBackendSession(null);
       setIsLoading(false);
-    });
-
-    // Listen to AUTH_SESSION_CHANGED_EVENT for manual logout (e.g. ProfileLogoutButton)
-    let prevSession = getAuthSession();
-    function handleSessionChange() {
-      const currentSession = getAuthSession();
-      setBackendSession(currentSession);
-      // Hanya tampilkan alert jika sebelumnya ada session, lalu session menjadi null (benar-benar logout)
-      if (prevSession && !currentSession) {
-        alert('Logout berhasil!');
-      }
-      prevSession = currentSession;
+      return;
     }
-    window.addEventListener('ukomp:auth-session-changed', handleSessionChange);
 
-    return () => {
-      unsubscribe();
-      window.removeEventListener('ukomp:auth-session-changed', handleSessionChange);
-    };
-  }, []);
+    const existingSession = getAuthSession();
+
+    // ✅ JANGAN SYNC LAGI kalau session sudah ada
+    if (existingSession) {
+      setBackendSession(existingSession);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const session =
+        await firebaseAuthService.syncFirebaseToBackend(user);
+
+      if (session) {
+        saveAuthSession(session);
+        setBackendSession(session);
+      }
+    } catch (error) {
+      console.error("Firebase sync failed:", error);
+    }
+
+    setIsLoading(false);
+  });
+
+  return () => unsubscribe();
+}, []);
+
 
   return (
     <AuthContext.Provider value={{ firebaseUser, backendSession, isLoading }}>

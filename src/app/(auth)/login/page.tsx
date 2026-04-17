@@ -9,8 +9,9 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { loginWithPassword, saveAuthSession } from "@/lib/auth";
 import { googleProvider } from "@/lib/firebaseAuth";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { loginWithFirebaseAction, saveAuthSession } from "@/lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,25 +19,38 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+  setError(null);
+  setIsSubmitting(true);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+  try {
+    // 1️⃣ Login Firebase
+    const credential = await signInWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
 
-    try {
-      // Backend login first for session
-      const session = await loginWithPassword({ email, password });
-      saveAuthSession(session);
-      // Context will sync Firebase state
-      router.push("/");
-      router.refresh();
-    } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Login gagal.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // 2️⃣ Ambil Firebase ID Token
+    const idToken = await credential.user.getIdToken();
+
+    // 3️⃣ Sync ke Laravel
+    const session = await loginWithFirebaseAction({
+      idToken,
+    });
+
+    // 4️⃣ Simpan session Laravel
+    saveAuthSession(session);
+
+    router.push("/");
+    router.refresh();
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setIsSubmitting(false);
   }
+}
 
   return (
     <Card className="w-full space-y-6 rounded-2xl p-8">

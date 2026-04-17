@@ -1,5 +1,5 @@
 import { ProductCard } from "@/components/ui/ProductCard";
-import { fetchAPI } from "@/lib/api";
+import { api } from "@/lib/api";
 
 type Category = {
   id: number;

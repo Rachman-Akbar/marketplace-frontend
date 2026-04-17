@@ -113,6 +113,7 @@ export async function authRequest<T>(
       const payload = await response.json().catch(() => ({}));
 
       if (response.ok) {
+        console.log("API CALL:", buildEndpoint(baseUrl, endpoint));
         return payload as T;
       }
 
@@ -143,14 +144,24 @@ export async function registerWithPassword(input: {
   });
 }
 
-export async function loginWithPassword(input: {
-  email: string;
-  password: string;
-}): Promise<AuthResponse> {
-  return postAuth<AuthResponse>("/v1/identity/auth/login", {
-    email: input.email,
-    password: input.password,
-  });
+import api from "./axios";
+
+export async function loginWithFirebaseAction({
+  idToken,
+}: {
+  idToken: string;
+}) {
+  const res = await api.post(
+    "/auth/firebase-login",
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    }
+  );
+
+  return res.data;
 }
 
 export function saveAuthSession(session: AuthResponse): void {

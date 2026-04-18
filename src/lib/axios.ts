@@ -1,9 +1,11 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+export const api = axios.create({
+  baseURL: BASE_URL,
   headers: {
-    "Content-Type": "application/json",
+    Accept: "application/json",
   },
 });
 
@@ -12,18 +14,14 @@ const api = axios.create({
  */
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const session = localStorage.getItem("auth_session");
+    const session = localStorage.getItem("ukomp.auth.session");
 
     if (session) {
-      const { api_token } = JSON.parse(session);
-
-      if (api_token) {
-        config.headers.Authorization = `Bearer ${api_token}`;
-      }
+      const parsed = JSON.parse(session);
+      config.headers.Authorization =
+        `Bearer ${parsed.api_token}`;
     }
   }
 
   return config;
 });
-
-export default api;

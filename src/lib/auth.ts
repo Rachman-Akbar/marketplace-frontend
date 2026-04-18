@@ -1,3 +1,5 @@
+// lib/auth.ts
+
 export type AuthUser = {
   id: string;
   firebase_uid: string | null;
@@ -17,6 +19,7 @@ export type AuthResponse = {
 export type AuthSession = AuthResponse;
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 const DEFAULT_BASE_URLS = [
   "http://localhost/UKOMP/market-api/public/api",
   "http://127.0.0.1/UKOMP/market-api/public/api",
@@ -27,68 +30,31 @@ const DEFAULT_BASE_URLS = [
 const AUTH_STORAGE_KEY = "ukomp.auth.session";
 export const AUTH_SESSION_CHANGED_EVENT = "ukomp:auth-session-changed";
 
+/* =====================================================
+   BASE URL
+===================================================== */
+
 function getBaseUrls(): string[] {
   return BASE_URL ? [BASE_URL] : DEFAULT_BASE_URLS;
 }
 
-function buildEndpoint(baseUrl: string, endpoint: string): string {
-  const safeEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+function buildEndpoint(baseUrl: string, endpoint: string) {
+  const safeEndpoint = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
 
   return `${baseUrl.replace(/\/$/, "")}${safeEndpoint}`;
 }
 
-async function postAuth<T>(endpoint: string, body: Record<string, unknown>): Promise<T> {
-  const baseUrls = getBaseUrls();
-
-  let lastError: unknown;
-
-  for (const baseUrl of baseUrls) {
-    try {
-      const response = await fetch(buildEndpoint(baseUrl, endpoint), {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-
-      const payload = await response.json().catch(() => ({}));
-
-      if (response.ok) {
-        return payload as T;
-      }
-
-      if (typeof payload?.message === "string") {
-        lastError = new Error(payload.message);
-      } else if (payload?.errors && typeof payload.errors === "object") {
-        const firstError = Object.values(payload.errors)[0];
-        if (Array.isArray(firstError) && typeof firstError[0] === "string") {
-          lastError = new Error(firstError[0]);
-        }
-      }
-
-      if (!lastError) {
-        lastError = new Error(`Request failed (${response.status})`);
-      }
-    } catch (error) {
-      if (error instanceof TypeError) {
-        lastError = new Error(
-          "Tidak bisa terhubung ke server API. Cek URL API dan konfigurasi CORS/backend.",
-        );
-      } else {
-        lastError = error;
-      }
-    }
-  }
-
-  throw lastError instanceof Error ? lastError : new Error("Auth request failed");
-}
+/* =====================================================
+   AUTH REQUEST CORE
+===================================================== */
 
 export async function authRequest<T>(
   endpoint: string,
   init: RequestInit & { token?: string } = {},
 ): Promise<T> {
+
   const baseUrls = getBaseUrls();
   let lastError: unknown;
 
@@ -105,30 +71,43 @@ export async function authRequest<T>(
         headers.set("Authorization", `Bearer ${init.token}`);
       }
 
-      const response = await fetch(buildEndpoint(baseUrl, endpoint), {
-        ...init,
-        headers,
-      });
+      const response = await fetch(
+        buildEndpoint(baseUrl, endpoint),
+        {
+          ...init,
+          headers,
+        }
+      );
 
-      const payload = await response.json().catch(() => ({}));
+      let payload: any = {};
+
+      // ✅ FIX IMPORTANT (204 logout bug)
+      if (response.status !== 204) {
+        payload = await response.json().catch(() => ({}));
+      }
 
       if (response.ok) {
-        console.log("API CALL:", buildEndpoint(baseUrl, endpoint));
         return payload as T;
       }
 
-      if (typeof payload?.message === "string") {
-        lastError = new Error(payload.message);
-      } else {
-        lastError = new Error(`Request failed (${response.status})`);
-      }
+      lastError =
+        typeof payload?.message === "string"
+          ? new Error(payload.message)
+          : new Error(`Request failed (${response.status})`);
+
     } catch (error) {
       lastError = error;
     }
   }
 
-  throw lastError instanceof Error ? lastError : new Error("Auth request failed");
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Auth request failed");
 }
+
+/* =====================================================
+   REGISTER
+===================================================== */
 
 export async function registerWithPassword(input: {
   name: string;
@@ -136,55 +115,46 @@ export async function registerWithPassword(input: {
   password: string;
   passwordConfirmation: string;
 }): Promise<AuthResponse> {
-  return postAuth<AuthResponse>("/v1/identity/auth/register", {
-    name: input.name,
-    email: input.email,
-    password: input.password,
-    password_confirmation: input.passwordConfirmation,
-  });
-}
-
-import api from "./axios";
-
-export async function loginWithFirebaseAction({
-  idToken,
-}: {
-  idToken: string;
-}) {
-  const res = await api.post(
-    "/auth/firebase-login",
-    {},
+  return authRequest<AuthResponse>(
+    "/v1/identity/auth/register",
     {
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },
+      method: "POST",
+      body: JSON.stringify({
+        name: input.name,
+        email: input.email,
+        password: input.password,
+        password_confirmation: input.passwordConfirmation,
+      }),
     }
   );
-
-  return res.data;
 }
 
-export function saveAuthSession(session: AuthResponse): void {
-  if (typeof window === "undefined") {
-    return;
-  }
+/* =====================================================
+   SESSION STORAGE
+===================================================== */
 
-  window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
-  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+export function saveAuthSession(session: AuthResponse) {
+  if (typeof window === "undefined") return;
+
+  localStorage.setItem(
+    AUTH_STORAGE_KEY,
+    JSON.stringify(session)
+  );
+
+  window.dispatchEvent(
+    new Event(AUTH_SESSION_CHANGED_EVENT)
+  );
 }
 
 export function getAuthSession(): AuthSession | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
+  if (typeof window === "undefined") return null;
 
-  const rawSession = window.localStorage.getItem(AUTH_STORAGE_KEY);
-  if (!rawSession) {
-    return null;
-  }
+  const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+  if (!raw) return null;
 
   try {
-    const parsed = JSON.parse(rawSession) as AuthSession;
+    const parsed = JSON.parse(raw);
+
     if (!parsed?.api_token || !parsed?.user?.id) {
       return null;
     }
@@ -195,18 +165,19 @@ export function getAuthSession(): AuthSession | null {
   }
 }
 
-export function clearAuthSession(): void {
-  if (typeof window === "undefined") {
-    return;
-  }
-
-  window.localStorage.removeItem(AUTH_STORAGE_KEY);
-  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+export function clearAuthSession() {
+  localStorage.removeItem("auth_session");
 }
 
-export async function verifyAuthSession(session: AuthSession): Promise<boolean> {
+/* =====================================================
+   VERIFY SESSION
+===================================================== */
+
+export async function verifyAuthSession(
+  session: AuthSession
+): Promise<boolean> {
   try {
-    await authRequest<{ user: AuthUser }>("/v1/identity/auth/me", {
+    await authRequest("/v1/identity/auth/me", {
       method: "GET",
       token: session.api_token,
     });
@@ -217,25 +188,83 @@ export async function verifyAuthSession(session: AuthSession): Promise<boolean> 
   }
 }
 
-export async function getVerifiedAuthSession(): Promise<AuthSession | null> {
+export async function getVerifiedAuthSession() {
   const session = getAuthSession();
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
-  const isValid = await verifyAuthSession(session);
-  if (!isValid) {
+  const valid = await verifyAuthSession(session);
+
+  if (!valid) {
     clearAuthSession();
-
     return null;
   }
 
   return session;
 }
 
-export async function logoutWithToken(token: string): Promise<void> {
-  await authRequest<{ message: string }>("/v1/identity/auth/logout", {
-    method: "POST",
-    token,
-  });
+/* =====================================================
+   LOGOUT
+===================================================== */
+
+export async function logoutWithToken(token: string) {
+  await authRequest(
+    "/v1/identity/auth/logout",
+    {
+      method: "POST",
+      token,
+    }
+  );
 }
+
+/* =====================================================
+   GLOBAL LOGOUT (SAFE)
+===================================================== */
+
+import { api } from "./axios";
+
+export async function logout() {
+  try {
+    await api.post("/v1/identity/auth/logout");
+  } catch (e) {
+    console.log("Logout API error ignored");
+  }
+
+  /**
+   * CLEAR SESSION
+   */
+  localStorage.removeItem("ukomp.auth.session");
+
+  /**
+   * VERY IMPORTANT
+   * reset axios header
+   */
+  delete api.defaults.headers.common["Authorization"];
+
+  /**
+   * notify app
+   */
+  window.dispatchEvent(
+    new Event("ukomp:auth-session-changed")
+  );
+}
+
+/* =====================================================
+   FIREBASE LOGIN
+===================================================== */
+
+export async function loginWithFirebaseAction({
+  idToken,
+}: {
+  idToken: string;
+}) {
+  return authRequest<AuthResponse>(
+    "/v1/identity/auth/firebase-login",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    }
+  );
+}
+

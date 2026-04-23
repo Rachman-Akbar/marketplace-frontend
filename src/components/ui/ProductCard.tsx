@@ -1,88 +1,63 @@
 import Link from "next/link";
 
 type ProductCardProps = {
-  id?: number | string;
+  id: number;
   title: string;
-  image?: string;
-  price: number | string;
-  originalPrice?: number | string;
-  discountLabel?: string;
-  voucherLabel?: string;
-  rating?: number;
-  soldText?: string;
+  image: string;
+  price: number;
   metaText?: string;
-  href?: string;
-  imageTone?: string;
+  soldText?: string;
+  href: string;
 };
 
-function formatPrice(value: number | string): string {
-  if (typeof value === "number") {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }).format(value);
-  }
-
-  return value;
+function formatPrice(price: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(price);
 }
 
 export function ProductCard({
   title,
   image,
   price,
-  originalPrice,
-  discountLabel,
-  voucherLabel,
-  rating,
-  soldText,
   metaText,
+  soldText,
   href,
-  imageTone = "from-stone-200 to-slate-100",
 }: ProductCardProps) {
-  const imageBlock = (
-    <div className={`relative aspect-[4/5] overflow-hidden bg-gradient-to-br ${imageTone}`}>
-      {image ? <img src={image} alt={title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" /> : null}
-      {discountLabel ? (
-        <span className="absolute left-3 top-3 rounded-full bg-emerald-700 px-3 py-1 text-[10px] font-extrabold tracking-wide text-white">
-          {discountLabel}
-        </span>
-      ) : null}
-      {voucherLabel ? (
-        <span className="absolute left-3 top-11 bg-lime-100 px-2 py-1 text-[10px] font-semibold text-slate-700">
-          {voucherLabel}
-        </span>
-      ) : null}
-      <button className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-600 shadow-sm" type="button" aria-label="Favorite">
-        <span className="material-symbols-outlined text-base">favorite</span>
-      </button>
-    </div>
-  );
-
   return (
-    <article className="group overflow-hidden rounded-xl bg-white shadow-sm transition hover:shadow-lg">
-      {href ? <Link href={href} className="block">{imageBlock}</Link> : imageBlock}
+    <Link
+      href={href}
+      className="group block cursor-pointer overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
+    >
+      <div className="aspect-square overflow-hidden bg-gray-100">
+        <img
+          src={image}
+          alt={title}
+          className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-110"
+        />
+      </div>
 
       <div className="space-y-2 p-4">
-        <h3 className="line-clamp-2 text-[29px] font-bold leading-tight tracking-tight text-slate-900">{title}</h3>
-        {metaText ? <p className="text-xs text-slate-500">{metaText}</p> : null}
-        {(typeof rating === "number" || soldText) ? (
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            {typeof rating === "number" ? (
-              <>
-                <span className="material-symbols-outlined text-sm text-amber-500">star</span>
-                <span className="font-semibold text-slate-700">{rating.toFixed(1)}</span>
-              </>
-            ) : null}
-            {soldText ? <span>{soldText}</span> : null}
-          </div>
-        ) : null}
-        <div className="flex items-center gap-2">
-          <p className="text-[32px] font-extrabold leading-none text-emerald-700">{formatPrice(price)}</p>
-          {originalPrice ? <p className="text-sm text-slate-400 line-through">{formatPrice(originalPrice)}</p> : null}
+        <h3 className="line-clamp-2 min-h-[48px] text-base font-semibold transition-colors group-hover:text-blue-600">
+          {title}
+        </h3>
+
+        <div className="text-lg font-bold">{formatPrice(price)}</div>
+
+        {metaText && (
+          <p className="text-sm text-gray-500 line-clamp-1">{metaText}</p>
+        )}
+
+        {soldText && (
+          <p className="text-xs text-gray-400 line-clamp-1">{soldText}</p>
+        )}
+
+        <div className="pt-1 text-sm font-medium text-blue-600 opacity-0 transition duration-300 group-hover:opacity-100">
+          Lihat produk →
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

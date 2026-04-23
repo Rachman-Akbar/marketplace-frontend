@@ -1,8 +1,6 @@
 import axios from "axios";
 
-const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://127.0.0.1:8000/api";
+const BASE_URL = "http://localhost:8000/api/v1";
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -12,21 +10,20 @@ export const api = axios.create({
   },
 });
 
-/**
- * AUTO ATTACH TOKEN
- */
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    const session = localStorage.getItem("auth_session");
+    const session = localStorage.getItem("ukomp.auth.session");
 
     if (session) {
       try {
-        const { api_token } = JSON.parse(session);
+        const parsed = JSON.parse(session);
 
-        if (api_token) {
-          config.headers.Authorization = `Bearer ${api_token}`;
+        if (parsed?.api_token) {
+          config.headers.Authorization = `Bearer ${parsed.api_token}`;
         }
-      } catch {}
+      } catch (error) {
+        console.error("Failed parse session", error);
+      }
     }
   }
 

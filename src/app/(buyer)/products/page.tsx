@@ -1,111 +1,53 @@
-import { fetchAPI } from "@/lib/api";
-import { ProductFilterButton } from "@/components/filters/ProductFilterButton";
+import { catalogService } from "@/lib/catalogService";
 import { ProductCard } from "@/components/ui/ProductCard";
+import { toProductRoute } from "@/lib/catalogRoutes";
 
-type ProductImage = {
-  image_url?: string | null;
-  url?: string | null;
-  is_primary?: boolean;
-};
-
-type Product = {
-  id: number;
-  slug: string;
-  name: string;
-  description?: string | null;
-  price: number;
-  stock?: number;
-  category?: {
-    name?: string;
-    slug?: string;
-  };
-  thumbnail?: string | null;
-  images?: ProductImage[];
-};
-
-type CategoryOption = {
-  id: number;
-  name: string;
-  slug: string;
-};
-
-type ProductsPageProps = {
-  searchParams?: Promise<{ category?: string; categories?: string; sort?: string }>;
-};
-
-function resolveImage(product: Product): string {
-  if (product.thumbnail) {
-    return product.thumbnail;
-  }
-
-  const primary = product.images?.find((image) => image.is_primary);
-  const fallback = primary ?? product.images?.[0];
-
-  return fallback?.image_url ?? fallback?.url ?? "https://via.placeholder.com/900x900?text=No+Image";
+function resolveProductImage(product: any) {
+  return (
+    product?.thumbnail ||
+    product?.images?.find((img: any) => img.is_primary)?.image_url ||
+    product?.images?.[0]?.image_url ||
+    "https://via.placeholder.com/600x600?text=No+Image"
+  );
 }
 
-export default async function ProductsPage({ searchParams }: ProductsPageProps) {
-  const params = searchParams ? await searchParams : undefined;
-  const selectedCategories = params?.categories
-    ? params.categories
-        .split(",")
-        .map((item) => item.trim())
-        .filter(Boolean)
-    : params?.category
-      ? [params.category]
-      : [];
-  const sort = params?.sort ?? "popularity";
-  let items: Product[] = [];
-  let categories: CategoryOption[] = [];
-
-  try {
-    [items, categories] = await Promise.all([
-      fetchAPI<Product[]>("/products"),
-      fetchAPI<CategoryOption[]>("/categories"),
-    ]);
-  } catch {
-    items = [];
-    categories = [];
-  }
-
-  if (selectedCategories.length > 0) {
-    items = items.filter((item) => {
-      const slug = item.category?.slug;
-
-      return !!slug && selectedCategories.includes(slug);
-    });
-  }
-
-  if (sort === "price_asc") {
-    items = [...items].sort((a, b) => a.price - b.price);
-  } else if (sort === "price_desc") {
-    items = [...items].sort((a, b) => b.price - a.price);
-  } else if (sort === "name_asc") {
-    items = [...items].sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sort === "newest") {
-    items = [...items].sort((a, b) => b.id - a.id);
-  }
+export default async function ProductsPage() {
+  const products: any = await catalogService.getProducts();
+  const productList = Array.isArray(products) ? products : [];
 
   return (
-    <section className="space-y-8">
-      <div className="flex justify-end">
-        <ProductFilterButton categories={categories} currentCategories={selectedCategories} currentSort={sort} />
-      </div>
+    <main className="mx-auto max-w-[1440px] px-6 py-10">
+      <section>
+        <h1 className="text-4xl font-bold">Products</h1>
+        <p className="mt-2 text-gray-500">
+          Semua produk dari backend catalog API.
+        </p>
+      </section>
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        {items.map((item) => (
-          <ProductCard
-            key={item.id}
-            id={item.id}
-            title={item.name}
-            image={resolveImage(item)}
-            price={item.price}
-            metaText={item.category?.name ?? ""}
-            soldText={typeof item.stock === "number" ? `Stock ${item.stock}` : undefined}
-            href={`/products/${item.slug}`}
-          />
-        ))}
-      </div>
-    </section>
+      <section className="mt-10">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {productList.length > 0 ? (
+            productList.map((product: any) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                title={product.name}
+                image={resolveProductImage(product)}
+                price={Number(product.price)}
+                metaText={product.category?.name ?? product.store?.name ?? ""}
+                soldText={
+                  typeof product.stock === "number"
+                    ? `Stock ${product.stock}`
+                    : undefined
+                }
+                href={toProductRoute(product.slug)}
+              />
+            ))
+          ) : (
+            <p className="text-sm text-gray-500">Belum ada produk.</p>
+          )}
+        </div>
+      </section>
+    </main>
   );
 }

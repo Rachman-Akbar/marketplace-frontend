@@ -17,9 +17,27 @@ export const catalogService = {
     return unwrap(res);
   },
 
+  async getProductBySlug(slug: string) {
+    const api = await serverApi();
+    const res = await api.get(`/catalog/products/${slug}`);
+    return unwrap(res);
+  },
+
   async getCategories() {
     const api = await serverApi();
     const res = await api.get("/catalog/categories");
+    return unwrap(res);
+  },
+
+  async getCategoryBySlug(slug: string) {
+    const api = await serverApi();
+    const res = await api.get(`/catalog/categories/${slug}`);
+    return unwrap(res);
+  },
+
+  async getProductsByCategorySlug(slug: string) {
+    const api = await serverApi();
+    const res = await api.get(`/catalog/categories/${slug}/products`);
     return unwrap(res);
   },
 
@@ -29,9 +47,33 @@ export const catalogService = {
     return unwrap(res);
   },
 
+  async getCatalogGroupBySlug(slug: string) {
+    const api = await serverApi();
+    const res = await api.get(`/catalog/catalog-groups/${slug}`);
+    return unwrap(res);
+  },
+
+  async getProductsByCatalogGroupSlug(slug: string) {
+    const api = await serverApi();
+    const res = await api.get(`/catalog/catalog-groups/${slug}/products`);
+    return unwrap(res);
+  },
+
   async getStores() {
     const api = await serverApi();
     const res = await api.get("/catalog/stores");
+    return unwrap(res);
+  },
+
+  async getStoreBySlug(slug: string) {
+    const api = await serverApi();
+    const res = await api.get(`/catalog/stores/${slug}`);
+    return unwrap(res);
+  },
+
+  async getProductsByStoreSlug(slug: string) {
+    const api = await serverApi();
+    const res = await api.get(`/catalog/stores/${slug}/products`);
     return unwrap(res);
   },
 };

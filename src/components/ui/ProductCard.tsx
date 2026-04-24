@@ -46,13 +46,8 @@ export function ProductCard({
 
         <div className="text-lg font-bold">{formatPrice(price)}</div>
 
-        {metaText && (
-          <p className="text-sm text-gray-500 line-clamp-1">{metaText}</p>
-        )}
-
-        {soldText && (
-          <p className="text-xs text-gray-400 line-clamp-1">{soldText}</p>
-        )}
+        {metaText && <p className="line-clamp-1 text-sm text-gray-500">{metaText}</p>}
+        {soldText && <p className="line-clamp-1 text-xs text-gray-400">{soldText}</p>}
 
         <div className="pt-1 text-sm font-medium text-blue-600 opacity-0 transition duration-300 group-hover:opacity-100">
           Lihat produk →

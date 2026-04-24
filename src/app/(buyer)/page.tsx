@@ -1,6 +1,16 @@
-import Link from "next/link";
 import { ProductCard } from "@/components/ui/ProductCard";
+import { BannerCard } from "@/components/ui/BannerCard";
+import { CatalogGroupCard } from "@/components/ui/CatalogGroupCard";
+import { CategoryCard } from "@/components/ui/CategoryCard";
+import { StoreCard } from "@/components/ui/StoreCard";
 import { catalogService } from "@/lib/catalogService";
+import {
+  toBannerRoute,
+  toProductRoute,
+  toCategoryProductsRoute,
+  toCatalogGroupProductsRoute,
+  toStoreRoute,
+} from "@/lib/catalogRoutes";
 
 type Banner = {
   id: number;
@@ -121,26 +131,19 @@ export default async function BuyerHomePage() {
     metaText: product.category?.name ?? product.store?.name ?? "",
     soldText:
       typeof product.stock === "number" ? `Stock ${product.stock}` : undefined,
-    href: `/products/${product.slug}`,
+    href: toProductRoute(product.slug),
   }));
 
   return (
     <div className="space-y-16 pb-16">
-      {/* BANNER */}
       <section className="mx-auto max-w-[1440px] pt-6">
         {banners.length > 0 ? (
-          <Link
-            href={banners[0].link_url || "#"}
-            className="group block overflow-hidden rounded-2xl"
-          >
-            <div className="overflow-hidden rounded-2xl">
-              <img
-                src={banners[0].image_url}
-                alt={banners[0].title ?? "Banner"}
-                className="h-[260px] w-full object-cover transition duration-500 ease-out group-hover:scale-105 md:h-[420px] xl:h-[560px]"
-              />
-            </div>
-          </Link>
+          <BannerCard
+            title={banners[0].title}
+            subtitle={banners[0].subtitle}
+            imageUrl={banners[0].image_url}
+            href={toBannerRoute(banners[0].link_url)}
+          />
         ) : (
           <div className="rounded-2xl bg-gray-100 px-8 py-16">
             <h1 className="text-4xl font-extrabold">Buyer Homepage</h1>
@@ -151,7 +154,6 @@ export default async function BuyerHomePage() {
         )}
       </section>
 
-      {/* ERROR */}
       {errorMessage && (
         <section className="mx-auto max-w-[1440px]">
           <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
@@ -160,61 +162,34 @@ export default async function BuyerHomePage() {
         </section>
       )}
 
-      {/* CATALOG GROUPS */}
       <section className="mx-auto max-w-[1440px] space-y-6">
         <div>
           <h2 className="text-3xl font-bold">Catalog Groups</h2>
           <p className="text-sm text-gray-500">
-            Data katalog group dari backend
+            Data catalog group dari backend
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {catalogGroups.length > 0 ? (
             catalogGroups.map((group) => (
-              <Link
+              <CatalogGroupCard
                 key={group.id}
-                href={`/catalog-groups/${group.slug}`}
-                className="group block cursor-pointer overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-gray-100">
-                  <img
-                    src={
-                      group.image_url ||
-                      group.cover_image_url ||
-                      "https://via.placeholder.com/600x400?text=Group"
-                    }
-                    alt={group.name}
-                    className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-110"
-                  />
-                </div>
-
-                <div className="p-4">
-                  <h3 className="text-base font-bold transition-colors group-hover:text-blue-600">
-                    {group.name}
-                  </h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    {group.categories?.length ?? 0} categories
-                  </p>
-
-                  {group.categories?.length ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {group.categories.slice(0, 3).map((category) => (
-                        <span
-                          key={category.id}
-                          className="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-700"
-                        >
-                          {category.name}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <div className="mt-4 text-sm font-medium text-blue-600 opacity-0 transition duration-300 group-hover:opacity-100">
-                    Lihat detail →
-                  </div>
-                </div>
-              </Link>
+                name={group.name}
+                categoryCount={group.categories?.length ?? 0}
+                href={toCatalogGroupProductsRoute(group.slug)}
+                imageUrl={
+                  group.image_url ||
+                  group.cover_image_url ||
+                  "https://via.placeholder.com/600x400?text=Group"
+                }
+                categories={
+                  group.categories?.map((category) => ({
+                    id: category.id,
+                    name: category.name,
+                  })) ?? []
+                }
+              />
             ))
           ) : (
             <p className="text-sm text-gray-500">Belum ada catalog groups.</p>
@@ -222,48 +197,26 @@ export default async function BuyerHomePage() {
         </div>
       </section>
 
-      {/* CATEGORIES */}
       <section className="mx-auto max-w-[1440px] space-y-6">
         <div>
           <h2 className="text-3xl font-bold">Categories</h2>
           <p className="text-sm text-gray-500">Data kategori dari backend</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {categories.length > 0 ? (
             categories.map((category) => (
-              <Link
+              <CategoryCard
                 key={category.id}
-                href={`/categories/${category.slug}`}
-                className="group block cursor-pointer overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="aspect-square overflow-hidden bg-gray-100">
-                  <img
-                    src={
-                      category.image_url ||
-                      category.cover_image_url ||
-                      "https://via.placeholder.com/500x500?text=Category"
-                    }
-                    alt={category.name}
-                    className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-110"
-                  />
-                </div>
-
-                <div className="p-4">
-                  <div className="font-semibold transition-colors group-hover:text-blue-600">
-                    {category.name}
-                  </div>
-                  <div className="mt-1 text-sm text-gray-500">
-                    {category.slug}
-                  </div>
-
-                  {typeof category.products_count === "number" && (
-                    <div className="mt-2 text-xs text-gray-400">
-                      {category.products_count} products
-                    </div>
-                  )}
-                </div>
-              </Link>
+                name={category.name}
+                itemCount={category.products_count ?? 0}
+                href={toCategoryProductsRoute(category.slug)}
+                imageUrl={
+                  category.image_url ||
+                  category.cover_image_url ||
+                  "https://via.placeholder.com/900x1200?text=Category"
+                }
+              />
             ))
           ) : (
             <p className="text-sm text-gray-500">Belum ada categories.</p>
@@ -271,7 +224,6 @@ export default async function BuyerHomePage() {
         </div>
       </section>
 
-      {/* PRODUCTS */}
       <section className="mx-auto max-w-[1440px] space-y-6">
         <div>
           <h2 className="text-3xl font-bold">Recommended Products</h2>
@@ -291,7 +243,6 @@ export default async function BuyerHomePage() {
         </div>
       </section>
 
-      {/* STORES */}
       <section className="mx-auto max-w-[1440px] space-y-6">
         <div>
           <h2 className="text-3xl font-bold">Stores</h2>
@@ -303,31 +254,13 @@ export default async function BuyerHomePage() {
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           {stores.length > 0 ? (
             stores.slice(0, 8).map((store) => (
-              <Link
+              <StoreCard
                 key={store.id}
-                href={`/stores/${store.slug}`}
-                className="group block cursor-pointer rounded-2xl border bg-white p-4 shadow-sm transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl"
-              >
-                <div className="mb-3 h-16 w-16 overflow-hidden rounded-full bg-gray-100">
-                  <img
-                    src={
-                      store.logo_url ||
-                      "https://via.placeholder.com/200x200?text=Store"
-                    }
-                    alt={store.name}
-                    className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-110"
-                  />
-                </div>
-
-                <div className="font-semibold transition-colors group-hover:text-blue-600">
-                  {store.name}
-                </div>
-                <div className="mt-1 text-sm text-gray-500">{store.slug}</div>
-
-                <div className="mt-3 text-sm font-medium text-blue-600 opacity-0 transition duration-300 group-hover:opacity-100">
-                  Kunjungi toko →
-                </div>
-              </Link>
+                name={store.name}
+                slug={store.slug}
+                href={toStoreRoute(store.slug)}
+                logoUrl={store.logo_url}
+              />
             ))
           ) : (
             <p className="text-sm text-gray-500">Belum ada stores.</p>

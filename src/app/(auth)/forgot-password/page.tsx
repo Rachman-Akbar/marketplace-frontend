@@ -1,29 +1,37 @@
 "use client";
 
-import { useState } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { FormEvent, useState } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import Link from "next/link";
+import { sendResetPasswordEmail } from "@/lib/auth";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    setSuccess("");
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    setError(null);
+    setSuccess(null);
     setIsSubmitting(true);
+
     try {
-      await sendPasswordResetEmail(auth, email);
-      setSuccess("Password reset email sent. Please check your inbox.");
-    } catch (err: any) {
-      setError(err.message || "Failed to send reset email.");
+      await sendResetPasswordEmail(email);
+
+      setSuccess(
+        "Link reset password sudah dikirim. Silakan cek inbox atau folder spam."
+      );
+    } catch (submitError) {
+      setError(
+        submitError instanceof Error
+          ? submitError.message
+          : "Gagal mengirim email reset password."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -32,28 +40,62 @@ export default function ForgotPasswordPage() {
   return (
     <Card className="w-full space-y-6 rounded-2xl p-8">
       <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Forgot Password?</h1>
-        <p className="text-sm text-slate-500">Enter your email to receive a password reset link.</p>
+        <p className="text-xs uppercase tracking-[0.2em] text-emerald-700">
+          Account Recovery
+        </p>
+
+        <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+          Forgot Password?
+        </h1>
+
+        <p className="text-sm text-slate-500">
+          Masukkan email akun kamu untuk menerima link reset password.
+        </p>
       </div>
+
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <label className="block text-sm font-semibold text-slate-700" htmlFor="email">Email Address</label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="Email address"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          required
-        />
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        {success && <p className="text-green-600 text-sm">{success}</p>}
-        <Button type="submit" className="w-full" disabled={isSubmitting}>
+        <div className="space-y-2">
+          <label
+            className="block text-sm font-semibold text-slate-700"
+            htmlFor="email"
+          >
+            Email Address
+          </label>
+
+          <Input
+            id="email"
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+            autoComplete="email"
+          />
+        </div>
+
+        {error ? (
+          <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+            {error}
+          </p>
+        ) : null}
+
+        {success ? (
+          <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+            {success}
+          </p>
+        ) : null}
+
+        <Button className="w-full" type="submit" disabled={isSubmitting}>
           {isSubmitting ? "Sending..." : "Send Reset Link"}
         </Button>
       </form>
-      <div className="text-center text-sm mt-4">
-        <Link href="/login" className="text-emerald-700 hover:underline">Back to Login</Link>
-      </div>
+
+      <p className="text-center text-sm text-slate-500">
+        Remember your password?{" "}
+        <Link href="/login" className="font-semibold text-emerald-700">
+          Back to Login
+        </Link>
+      </p>
     </Card>
   );
 }

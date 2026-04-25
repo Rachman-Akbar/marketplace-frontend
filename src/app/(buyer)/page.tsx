@@ -11,6 +11,7 @@ import {
   toCatalogGroupProductsRoute,
   toStoreRoute,
 } from "@/lib/catalogRoutes";
+import { logApiError } from "@/lib/logApiError";
 
 type Banner = {
   id: number;
@@ -103,25 +104,61 @@ export default async function BuyerHomePage() {
   let stores: Store[] = [];
   let errorMessage = "";
 
-  try {
-    [banners, products, categories, catalogGroups, stores] = await Promise.all([
-      catalogService.getBanners(),
-      catalogService.getProducts(),
-      catalogService.getCategories(),
-      catalogService.getCatalogGroups(),
-      catalogService.getStores(),
-    ]);
-  } catch (err: any) {
-    console.error("Homepage fetch error:", {
-      url: err?.response?.config?.url,
-      status: err?.response?.status,
-      data: err?.response?.data,
-      message: err?.message,
-    });
 
-    errorMessage =
-      err?.response?.data?.message || "Gagal memuat data homepage";
+try {
+  const results = await Promise.allSettled([
+    catalogService.getBanners(),
+    catalogService.getProducts(),
+    catalogService.getCategories(),
+    catalogService.getCatalogGroups(),
+    catalogService.getStores(),
+  ]);
+
+  const [
+    bannersResult,
+    productsResult,
+    categoriesResult,
+    catalogGroupsResult,
+    storesResult,
+  ] = results;
+
+  if (bannersResult.status === "fulfilled") {
+    banners = bannersResult.value;
+  } else {
+    logApiError("getBanners failed:", bannersResult.reason);
   }
+
+  if (productsResult.status === "fulfilled") {
+    products = productsResult.value;
+  } else {
+    logApiError("getProducts failed:", productsResult.reason);
+  }
+
+  if (categoriesResult.status === "fulfilled") {
+    categories = categoriesResult.value;
+  } else {
+    logApiError("getCategories failed:", categoriesResult.reason);
+  }
+
+  if (catalogGroupsResult.status === "fulfilled") {
+    catalogGroups = catalogGroupsResult.value;
+  } else {
+    logApiError("getCatalogGroups failed:", catalogGroupsResult.reason);
+  }
+
+  if (storesResult.status === "fulfilled") {
+    stores = storesResult.value;
+  } else {
+    logApiError("getStores failed:", storesResult.reason);
+  }
+
+  if (results.some((result) => result.status === "rejected")) {
+    errorMessage = "Sebagian data homepage gagal diambil dari backend.";
+  }
+} catch (err) {
+  logApiError("Homepage fetch error:", err);
+  errorMessage = "Gagal mengambil data homepage dari backend.";
+}
 
   const recommendedProducts = products.slice(0, 16).map((product) => ({
     id: product.id,

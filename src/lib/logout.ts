@@ -1,18 +1,38 @@
+// src/lib/logout.ts
+
 import { signOut } from "firebase/auth";
+import { api } from "@/lib/axios";
 import { auth } from "@/lib/firebase";
-import { clearAuthSession } from "@/lib/auth";
+import { clearAuthSession, getAuthSession } from "@/lib/auth";
 
-export async function logout() {
+export async function logout(): Promise<void> {
+  const session = getAuthSession();
+
   try {
-    // 1️⃣ logout Firebase
-    await signOut(auth);
-
-    // 2️⃣ hapus session Laravel
-    clearAuthSession();
-
-    // 3️⃣ redirect manual
-    window.location.href = "/login";
+    if (session?.api_token) {
+      await api.post(
+        "/identity/auth/logout",
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${session.api_token}`,
+          },
+        },
+      );
+    }
   } catch (error) {
-    console.error("Logout error:", error);
+    console.warn("Laravel logout failed, continuing local logout:", error);
   }
+
+  try {
+    await signOut(auth);
+  } catch (error) {
+    console.warn("Firebase sign out failed, continuing local cleanup:", error);
+  }
+
+  clearAuthSession();
+
+  delete api.defaults.headers.common.Authorization;
+
+  window.location.href = "/login";
 }

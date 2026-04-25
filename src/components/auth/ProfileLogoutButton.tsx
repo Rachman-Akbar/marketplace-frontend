@@ -1,40 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import {
-  clearAuthSession,
-  getAuthSession,
-  logoutWithToken,
-} from "@/lib/auth";
+import { logout } from "@/lib/logout";
 
 export function ProfileLogoutButton() {
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   async function handleLogout() {
+    if (isLoggingOut) return;
+
     setIsLoggingOut(true);
 
     try {
-      const session = getAuthSession();
-
-      // ✅ logout Laravel API
-      if (session?.api_token) {
-        await logoutWithToken(session.api_token);
-      }
-
-      // ✅ logout Firebase (INI YANG HILANG)
-      await signOut(auth);
+      await logout();
     } catch (error) {
       console.error("Logout error:", error);
-    } finally {
-      // ✅ hapus local session
-      clearAuthSession();
-
-      // ✅ HARD RESET APP
-      window.location.href = "/login";
+      setIsLoggingOut(false);
     }
   }
 

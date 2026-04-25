@@ -12,7 +12,7 @@ function resolveProductImage(product: any) {
 }
 
 export default async function ProductsPage() {
-  const products: any = await catalogService.getProducts();
+  const products: any = await catalogService.getProducts({all: true});
   const productList = Array.isArray(products) ? products : [];
 
   return (

@@ -3,7 +3,7 @@ import { CatalogGroupCard } from "@/components/ui/CatalogGroupCard";
 import { toCatalogGroupProductsRoute } from "@/lib/catalogRoutes";
 
 export default async function CatalogGroupsPage() {
-  const groups: any = await catalogService.getCatalogGroups();
+  const groups: any = await catalogService.getCatalogGroups( {all: true} );
   const groupList = Array.isArray(groups) ? groups : [];
 
   return (

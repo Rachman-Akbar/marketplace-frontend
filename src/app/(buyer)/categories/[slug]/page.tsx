@@ -7,70 +7,31 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
+const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
+
 function resolveProductImage(product: any) {
   return (
     product?.thumbnail ||
     product?.images?.find((img: any) => img.is_primary)?.image_url ||
     product?.images?.[0]?.image_url ||
-    "/images/placeholder.svg"
+    PLACEHOLDER_IMAGE
   );
-}
-
-function normalizeList(value: any): any[] {
-  if (Array.isArray(value)) return value;
-  if (Array.isArray(value?.data)) return value.data;
-  return [];
-}
-
-function uniqueProducts(products: any[]) {
-  const map = new Map<number | string, any>();
-
-  for (const product of products) {
-    if (product?.id) {
-      map.set(product.id, product);
-    }
-  }
-
-  return Array.from(map.values());
-}
-
-function filterProductsByCategory(products: any[], category: any, slug: string) {
-  return products.filter((product) => {
-    return (
-      product?.category?.slug === slug ||
-      product?.category_slug === slug ||
-      product?.category_id === category?.id ||
-      product?.category?.id === category?.id
-    );
-  });
 }
 
 export default async function CategoryDetailPage({ params }: PageProps) {
   const { slug } = await params;
 
   try {
-    const category = await catalogService.getCategoryBySlug(slug);
+    const [category, products]: any = await Promise.all([
+      catalogService.getCategoryBySlug(slug),
+      catalogService.getProductsByCategorySlug(slug),
+    ]);
 
     if (!category || Array.isArray(category)) {
       notFound();
     }
 
-    const categoryProducts = normalizeList(
-      await catalogService.getProductsByCategorySlug(slug),
-    );
-
-    const allProducts = normalizeList(await catalogService.getProducts());
-
-    const fallbackProducts = filterProductsByCategory(
-      allProducts,
-      category,
-      slug,
-    );
-
-    const productList = uniqueProducts([
-      ...categoryProducts,
-      ...fallbackProducts,
-    ]);
+    const productList = Array.isArray(products) ? products : [];
 
     return (
       <main className="mx-auto max-w-[1440px] px-6 py-10">
@@ -92,7 +53,7 @@ export default async function CategoryDetailPage({ params }: PageProps) {
           <div>
             <h2 className="text-2xl font-bold">Products</h2>
             <p className="text-sm text-gray-500">
-              Produk dalam kategori ini.
+              Semua produk dalam kategori ini.
             </p>
           </div>
 

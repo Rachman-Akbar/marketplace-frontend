@@ -1,18 +1,6 @@
 import axios from "axios";
 import { serverApi } from "./serverApi";
 
-type ListOptions = {
-  all?: boolean;
-  page?: number;
-  perPage?: number;
-  limit?: number;
-};
-
-const HOME_PREVIEW_PARAMS = {
-  per_page: 16,
-  limit: 16,
-};
-
 const FULL_LIST_PARAMS = {
   per_page: 100,
   limit: 100,
@@ -25,14 +13,6 @@ function unwrap<T>(res: any, fallback: T): T {
     return fallback;
   }
 
-  if (Array.isArray(payload.data)) {
-    return payload.data as T;
-  }
-
-  if (Array.isArray(payload.data?.data)) {
-    return payload.data.data as T;
-  }
-
   if (payload.data !== undefined) {
     return payload.data as T;
   }
@@ -40,11 +20,22 @@ function unwrap<T>(res: any, fallback: T): T {
   return payload as T;
 }
 
-function normalizeList(value: any): any[] {
+function normalizeList<T = any>(value: any): T[] {
   if (Array.isArray(value)) return value;
+
   if (Array.isArray(value?.data)) return value.data;
+
   if (Array.isArray(value?.data?.data)) return value.data.data;
+
   return [];
+}
+
+function getLastPage(payload: any): number {
+  return Number(
+    payload?.meta?.last_page ??
+      payload?.data?.meta?.last_page ??
+      1,
+  );
 }
 
 function isNotFound(error: unknown) {
@@ -63,49 +54,23 @@ function uniqueById<T extends { id?: number | string }>(items: T[]): T[] {
   return Array.from(map.values());
 }
 
-function getListParams(options?: ListOptions) {
-  if (options?.all) {
-    return {
-      ...FULL_LIST_PARAMS,
-      page: options.page ?? 1,
-      ...(options.perPage ? { per_page: options.perPage } : {}),
-      ...(options.limit ? { limit: options.limit } : {}),
-    };
-  }
-
-  return {
-    ...HOME_PREVIEW_PARAMS,
-    page: options?.page ?? 1,
-    ...(options?.perPage ? { per_page: options.perPage } : {}),
-    ...(options?.limit ? { limit: options.limit } : {}),
-  };
-}
-
-async function getFirstPage(path: string, options?: ListOptions) {
-  const api = await serverApi();
-
-  const res = await api.get(path, {
-    params: getListParams(options),
-  });
-
-  return unwrap(res, []);
-}
-
-async function getAllPages(path: string, options?: ListOptions) {
+async function getAllPages<T = any>(
+  path: string,
+  params: Record<string, any> = {},
+): Promise<T[]> {
   const api = await serverApi();
 
   const firstRes = await api.get(path, {
-    params: getListParams({
-      ...options,
-      all: true,
+    params: {
+      ...FULL_LIST_PARAMS,
+      ...params,
       page: 1,
-    }),
+    },
   });
 
   const firstPayload = firstRes.data;
-  const firstItems = normalizeList(firstPayload);
-
-  const lastPage = Number(firstPayload?.meta?.last_page ?? 1);
+  const firstItems = normalizeList<T>(firstPayload);
+  const lastPage = getLastPage(firstPayload);
 
   if (!lastPage || lastPage <= 1) {
     return firstItems;
@@ -116,29 +81,27 @@ async function getAllPages(path: string, options?: ListOptions) {
       const page = index + 2;
 
       return api.get(path, {
-        params: getListParams({
-          ...options,
-          all: true,
+        params: {
+          ...FULL_LIST_PARAMS,
+          ...params,
           page,
-        }),
+        },
       });
     }),
   );
 
-  const restItems = restResults.flatMap((res) => normalizeList(res.data));
+  const restItems = restResults.flatMap((res) =>
+    normalizeList<T>(res.data),
+  );
 
   return uniqueById([...firstItems, ...restItems]);
 }
 
-async function getList(path: string, options?: ListOptions) {
-  if (options?.all) {
-    return getAllPages(path, options);
-  }
-
-  return getFirstPage(path, options);
-}
-
-function filterProductsByCategory(products: any[], category: any, slug: string) {
+function filterProductsByCategory(
+  products: any[],
+  category: any,
+  slug: string,
+) {
   return products.filter((product) => {
     return (
       product?.category?.slug === slug ||
@@ -200,12 +163,12 @@ function filterProductsByCatalogGroup(
 }
 
 export const catalogService = {
-  async getBanners(options?: ListOptions) {
-    return getList("/catalog/banners", options);
+  async getBanners() {
+    return getAllPages("/catalog/banners");
   },
 
-  async getProducts(options?: ListOptions) {
-    return getList("/catalog/products", options);
+  async getProducts() {
+    return getAllPages("/catalog/products");
   },
 
   async getProductBySlug(slug: string) {
@@ -216,8 +179,8 @@ export const catalogService = {
     return unwrap(res, null);
   },
 
-  async getCategories(options?: ListOptions) {
-    return getList("/catalog/categories", options);
+  async getCategories() {
+    return getAllPages("/catalog/categories");
   },
 
   async getCategoryBySlug(slug: string) {
@@ -234,28 +197,20 @@ export const catalogService = {
         throw error;
       }
 
-      const categories = normalizeList(
-        await catalogService.getCategories({ all: true }),
-      );
+      const categories = await catalogService.getCategories();
 
-      return categories.find((category) => category.slug === slug) ?? null;
+      return categories.find((category: any) => category.slug === slug) ?? null;
     }
   },
 
-  async getProductsByCategorySlug(slug: string, options?: ListOptions) {
+  async getProductsByCategorySlug(slug: string) {
     try {
-      const products = await getList(
+      const directProducts = await getAllPages(
         `/catalog/categories/${encodeURIComponent(slug)}/products`,
-        {
-          ...options,
-          all: options?.all ?? true,
-        },
       );
 
-      const productList = normalizeList(products);
-
-      if (productList.length > 0) {
-        return productList;
+      if (directProducts.length > 0) {
+        return directProducts;
       }
     } catch (error) {
       if (!isNotFound(error)) {
@@ -269,15 +224,15 @@ export const catalogService = {
       return [];
     }
 
-    const allProducts = normalizeList(
-      await catalogService.getProducts({ all: true }),
-    );
+    const allProducts = await catalogService.getProducts();
 
-    return uniqueById(filterProductsByCategory(allProducts, category, slug));
+    return uniqueById(
+      filterProductsByCategory(allProducts, category, slug),
+    );
   },
 
-  async getCatalogGroups(options?: ListOptions) {
-    return getList("/catalog/catalog-groups", options);
+  async getCatalogGroups() {
+    return getAllPages("/catalog/catalog-groups");
   },
 
   async getCatalogGroupBySlug(slug: string) {
@@ -294,28 +249,20 @@ export const catalogService = {
         throw error;
       }
 
-      const catalogGroups = normalizeList(
-        await catalogService.getCatalogGroups({ all: true }),
-      );
+      const catalogGroups = await catalogService.getCatalogGroups();
 
-      return catalogGroups.find((group) => group.slug === slug) ?? null;
+      return catalogGroups.find((group: any) => group.slug === slug) ?? null;
     }
   },
 
-  async getCategoriesByCatalogGroupSlug(slug: string, options?: ListOptions) {
+  async getCategoriesByCatalogGroupSlug(slug: string) {
     try {
-      const categories = await getList(
+      const directCategories = await getAllPages(
         `/catalog/catalog-groups/${encodeURIComponent(slug)}/categories`,
-        {
-          ...options,
-          all: options?.all ?? true,
-        },
       );
 
-      const categoryList = normalizeList(categories);
-
-      if (categoryList.length > 0) {
-        return categoryList;
+      if (directCategories.length > 0) {
+        return directCategories;
       }
     } catch (error) {
       if (!isNotFound(error)) {
@@ -330,10 +277,7 @@ export const catalogService = {
     }
 
     const groupCategories = normalizeList(group.categories);
-
-    const allCategories = normalizeList(
-      await catalogService.getCategories({ all: true }),
-    );
+    const allCategories = await catalogService.getCategories();
 
     const filteredCategories = filterCategoriesByCatalogGroup(
       allCategories,
@@ -344,20 +288,14 @@ export const catalogService = {
     return uniqueById([...groupCategories, ...filteredCategories]);
   },
 
-  async getProductsByCatalogGroupSlug(slug: string, options?: ListOptions) {
+  async getProductsByCatalogGroupSlug(slug: string) {
     try {
-      const products = await getList(
+      const directProducts = await getAllPages(
         `/catalog/catalog-groups/${encodeURIComponent(slug)}/products`,
-        {
-          ...options,
-          all: options?.all ?? true,
-        },
       );
 
-      const productList = normalizeList(products);
-
-      if (productList.length > 0) {
-        return productList;
+      if (directProducts.length > 0) {
+        return directProducts;
       }
     } catch (error) {
       if (!isNotFound(error)) {
@@ -371,23 +309,16 @@ export const catalogService = {
       return [];
     }
 
-    const categories = normalizeList(
-      await catalogService.getCategoriesByCatalogGroupSlug(slug, {
-        all: true,
-      }),
-    );
-
-    const allProducts = normalizeList(
-      await catalogService.getProducts({ all: true }),
-    );
+    const categories = await catalogService.getCategoriesByCatalogGroupSlug(slug);
+    const allProducts = await catalogService.getProducts();
 
     return uniqueById(
       filterProductsByCatalogGroup(allProducts, group, categories, slug),
     );
   },
 
-  async getStores(options?: ListOptions) {
-    return getList("/catalog/stores", options);
+  async getStores() {
+    return getAllPages("/catalog/stores");
   },
 
   async getStoreBySlug(slug: string) {
@@ -402,23 +333,17 @@ export const catalogService = {
         throw error;
       }
 
-      const stores = normalizeList(await catalogService.getStores({ all: true }));
+      const stores = await catalogService.getStores();
 
-      return stores.find((store) => store.slug === slug) ?? null;
+      return stores.find((store: any) => store.slug === slug) ?? null;
     }
   },
 
-  async getProductsByStoreSlug(slug: string, options?: ListOptions) {
+  async getProductsByStoreSlug(slug: string) {
     try {
-      const products = await getList(
+      return await getAllPages(
         `/catalog/stores/${encodeURIComponent(slug)}/products`,
-        {
-          ...options,
-          all: options?.all ?? true,
-        },
       );
-
-      return normalizeList(products);
     } catch (error) {
       if (isNotFound(error)) {
         return [];

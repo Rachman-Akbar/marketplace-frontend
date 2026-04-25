@@ -14,6 +14,8 @@ import {
 } from "@/lib/catalogRoutes";
 import { logApiError } from "@/lib/logApiError";
 
+const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
+
 type Banner = {
   id: number;
   title: string;
@@ -88,24 +90,12 @@ type Product = {
   images?: ProductImage[];
 };
 
-function placeholderImage(label: string, width = 600, height = 600) {
-  const svg = `
-    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="${width}" height="${height}" fill="#F1F5F9"/>
-      <rect x="${width * 0.2}" y="${height * 0.2}" width="${width * 0.6}" height="${height * 0.45}" rx="24" fill="#CBD5E1"/>
-      <text x="50%" y="72%" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#64748B">${label}</text>
-    </svg>
-  `;
-
-  return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-}
-
 function resolveImage(product: Product) {
   return (
     product.thumbnail ??
     product.images?.find((img) => img.is_primary)?.image_url ??
     product.images?.[0]?.image_url ??
-    placeholderImage("No Image")
+    PLACEHOLDER_IMAGE
   );
 }
 
@@ -166,12 +156,11 @@ export default async function BuyerHomePage() {
       logApiError("getBanners failed:", bannersResult.reason);
     }
 
-    if (productsResult.status === "fulfilled") {
-      products = productsResult.value as Product[];
-    } else {
-      logApiError("getProducts failed:", productsResult.reason);
-    }
-
+if (productsResult.status === "fulfilled") {
+  products = productsResult.value as Product[];
+} else {
+  logApiError("getProducts failed:", productsResult.reason);
+}
     if (categoriesResult.status === "fulfilled") {
       categories = categoriesResult.value as Category[];
     } else {
@@ -198,7 +187,7 @@ export default async function BuyerHomePage() {
     errorMessage = "Gagal mengambil data homepage dari backend.";
   }
 
-  const recommendedProducts = products.slice(0, 16).map((product) => ({
+  const recommendedProducts = products.slice(0, 6).map((product) => ({
     id: product.id,
     title: product.name,
     image: resolveImage(product),
@@ -216,7 +205,7 @@ export default async function BuyerHomePage() {
           <BannerCard
             title={banners[0].title}
             subtitle={banners[0].subtitle}
-            imageUrl={banners[0].image_url}
+            imageUrl={banners[0].image_url || PLACEHOLDER_IMAGE}
             href={toBannerRoute(banners[0].link_url)}
           />
         ) : (
@@ -255,7 +244,7 @@ export default async function BuyerHomePage() {
                 imageUrl={
                   group.image_url ||
                   group.cover_image_url ||
-                  placeholderImage("Group", 600, 400)
+                  PLACEHOLDER_IMAGE
                 }
                 categories={
                   group.categories?.map((category) => ({
@@ -289,7 +278,7 @@ export default async function BuyerHomePage() {
                 imageUrl={
                   category.image_url ||
                   category.cover_image_url ||
-                  placeholderImage("Category", 900, 1200)
+                  PLACEHOLDER_IMAGE
                 }
               />
             ))
@@ -332,7 +321,7 @@ export default async function BuyerHomePage() {
                 name={store.name}
                 slug={store.slug}
                 href={toStoreRoute(store.slug)}
-                logoUrl={store.logo_url || placeholderImage("Store", 200, 200)}
+                logoUrl={store.logo_url || PLACEHOLDER_IMAGE}
               />
             ))
           ) : (

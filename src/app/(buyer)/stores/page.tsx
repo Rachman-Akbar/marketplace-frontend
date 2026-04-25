@@ -3,7 +3,7 @@ import { StoreCard } from "@/components/ui/StoreCard";
 import { toStoreRoute } from "@/lib/catalogRoutes";
 
 export default async function StoresPage() {
-  const stores: any = await catalogService.getStores();
+  const stores: any = await catalogService.getStores({all: true});
   const storeList = Array.isArray(stores) ? stores : [];
 
   return (

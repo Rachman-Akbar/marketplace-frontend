@@ -20,37 +20,24 @@ export {
    REGISTER
 ===================================================== */
 
-export async function registerWithPassword(input: {
-  name: string;
-  email: string;
-  password: string;
-  passwordConfirmation: string;
-}): Promise<AuthResponse> {
-  const response = await api.post<AuthResponse>("/identity/auth/register", {
-    name: input.name,
-    email: input.email,
-    password: input.password,
-    password_confirmation: input.passwordConfirmation,
-  });
-
-  return response.data;
-}
-
-/* =====================================================
-   FIREBASE LOGIN
-===================================================== */
-
 export async function loginWithFirebaseAction({
   idToken,
 }: {
   idToken: string;
 }): Promise<AuthResponse> {
+  const token = idToken?.trim();
+
+  if (!token) {
+    throw new Error("Firebase ID token kosong.");
+  }
+
   const response = await api.post<AuthResponse>(
     "/identity/auth/firebase-login",
-    {},
+    null,
     {
       headers: {
-        Authorization: `Bearer ${idToken}`,
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
       },
     },
   );

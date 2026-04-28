@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   addCartItem,
@@ -6,19 +6,20 @@ import {
   getCart,
   removeCartItem,
   updateCartItem,
-} from '@/lib/cart/cartApiService';
-import type { Cart } from '@/types/cart';
+} from "@/lib/cart/cartApiService";
+import type { Cart } from "@/types/cart";
 import {
   createContext,
   useCallback,
   useMemo,
   useState,
   type ReactNode,
-} from 'react';
+} from "react";
 
 type CartContextValue = {
   cart: Cart | null;
   loading: boolean;
+  mutating: boolean;
   error: string | null;
   fetchCart: () => Promise<void>;
   addItem: (productId: number, quantity?: number) => Promise<void>;
@@ -32,68 +33,87 @@ export const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mutating, setMutating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const run = useCallback(async (action: () => Promise<Cart>) => {
+  const handleError = useCallback((err: unknown) => {
+    const message =
+      err instanceof Error ? err.message : "Terjadi kesalahan cart.";
+
+    setError(message);
+    throw err;
+  }, []);
+
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const result = await action();
+      const result = await getCart();
       setCart(result);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : 'Terjadi kesalahan cart.';
-
-      setError(message);
-      throw err;
+      handleError(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [handleError]);
 
-  const fetchCart = useCallback(async () => {
-    await run(getCart);
-  }, [run]);
+  const runMutation = useCallback(
+    async (action: () => Promise<Cart>) => {
+      try {
+        setMutating(true);
+        setError(null);
+
+        const result = await action();
+        setCart(result);
+      } catch (err) {
+        handleError(err);
+      } finally {
+        setMutating(false);
+      }
+    },
+    [handleError],
+  );
 
   const addItem = useCallback(
     async (productId: number, quantity = 1) => {
-      await run(() =>
+      await runMutation(() =>
         addCartItem({
           product_id: productId,
           quantity,
-        })
+        }),
       );
     },
-    [run]
+    [runMutation],
   );
 
   const updateItem = useCallback(
     async (productId: number, quantity: number) => {
-      await run(() =>
+      await runMutation(() =>
         updateCartItem(productId, {
           quantity,
-        })
+        }),
       );
     },
-    [run]
+    [runMutation],
   );
 
   const removeItem = useCallback(
     async (productId: number) => {
-      await run(() => removeCartItem(productId));
+      await runMutation(() => removeCartItem(productId));
     },
-    [run]
+    [runMutation],
   );
 
   const clear = useCallback(async () => {
-    await run(clearCart);
-  }, [run]);
+    await runMutation(clearCart);
+  }, [runMutation]);
 
   const value = useMemo(
     () => ({
       cart,
       loading,
+      mutating,
       error,
       fetchCart,
       addItem,
@@ -101,7 +121,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem,
       clear,
     }),
-    [cart, loading, error, fetchCart, addItem, updateItem, removeItem, clear]
+    [
+      cart,
+      loading,
+      mutating,
+      error,
+      fetchCart,
+      addItem,
+      updateItem,
+      removeItem,
+      clear,
+    ],
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

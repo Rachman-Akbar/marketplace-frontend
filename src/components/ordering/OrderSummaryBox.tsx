@@ -1,4 +1,4 @@
-import { formatCurrency } from "@/lib/orderUtils";
+import { formatCurrency } from "@/lib/ordering/orderUtils";
 import { Order } from "@/types/order";
 
 type Props = {

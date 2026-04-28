@@ -1,6 +1,6 @@
 "use client";
 
-import { logApiError } from "@/lib/logApiError";
+import { logApiError } from "@/lib/axios";
 import React, {
   createContext,
   useContext,

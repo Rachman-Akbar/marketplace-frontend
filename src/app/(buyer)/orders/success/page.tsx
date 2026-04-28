@@ -8,7 +8,7 @@ import {
   formatCurrency,
   getOrderItems,
   resolveShippingAddress,
-} from "@/lib/orderUtils";
+} from "@/lib/ordering/orderUtils";
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();

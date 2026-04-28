@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrders } from "@/lib/orderApiService";
+import { getOrders } from "@/lib/ordering/orderApiService";
 import { GetOrdersParams, Order, OrdersResponse } from "@/types/order";
 
 export function useOrders(initialParams?: GetOrdersParams) {

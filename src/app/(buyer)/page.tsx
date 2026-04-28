@@ -12,7 +12,7 @@ import {
   toCatalogGroupProductsRoute,
   toStoreRoute,
 } from "@/lib/catalog/catalogRoutes";
-import { logApiError } from "@/lib/logApiError";
+import { logApiError } from "@/lib/axios";
 
 const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
 

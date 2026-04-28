@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useOrders } from "@/hooks/useOrders";
-import { formatCurrency, formatDate, getOrderItems } from "@/lib/orderUtils";
+import { formatCurrency, formatDate, getOrderItems } from "@/lib/ordering/orderUtils";
 import { OrderStatus } from "@/types/order";
 import OrderStatusBadge from "@/components/ordering/OrderStatusBadge";
 

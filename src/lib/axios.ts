@@ -16,6 +16,8 @@ export const api = axios.create({
   },
 });
 
+export const clientApi = api;
+
 api.interceptors.request.use((config) => {
   if (typeof window === "undefined") {
     return config;
@@ -50,6 +52,7 @@ export function getAxiosErrorMessage(
     const data = error.response?.data as
       | {
           message?: string;
+          error?: string;
           errors?: Record<string, string[]>;
         }
       | undefined;
@@ -66,6 +69,10 @@ export function getAxiosErrorMessage(
       return data.message;
     }
 
+    if (data?.error) {
+      return data.error;
+    }
+
     if (error.message) {
       return error.message;
     }
@@ -77,3 +84,38 @@ export function getAxiosErrorMessage(
 
   return fallback;
 }
+
+export function logApiError(label: string, error: unknown) {
+  const logger =
+    process.env.NODE_ENV === "development" ? console.warn : console.error;
+
+  if (axios.isAxiosError(error)) {
+    logger(label, {
+      message: error.message,
+      code: error.code,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      method: error.config?.method,
+      url: error.config?.url,
+      baseURL: error.config?.baseURL,
+      fullUrl: `${error.config?.baseURL ?? ""}${error.config?.url ?? ""}`,
+    });
+
+    return;
+  }
+
+  if (error instanceof Error) {
+    logger(label, {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+
+    return;
+  }
+
+  logger(label, error);
+}
+
+export default api;

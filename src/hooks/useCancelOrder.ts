@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cancelOrder as cancelOrderApi } from "@/lib/orderApiService";
+import { cancelOrder as cancelOrderApi } from "@/lib/ordering/orderApiService";
 import { CancelOrderPayload, Order } from "@/types/order";
 
 export function useCancelOrder() {

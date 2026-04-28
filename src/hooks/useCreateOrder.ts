@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { createOrder as createOrderApi } from "@/lib/orderApiService";
+import { createOrder as createOrderApi } from "@/lib/ordering/orderApiService";
 import { CreateOrderPayload, Order } from "@/types/order";
 
 export function useCreateOrder() {

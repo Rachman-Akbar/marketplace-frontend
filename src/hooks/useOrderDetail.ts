@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getOrderDetail } from "@/lib/orderApiService";
+import { getOrderDetail } from "@/lib/ordering/orderApiService";
 import { Order } from "@/types/order";
 
 export function useOrderDetail(orderId?: number | string | null) {

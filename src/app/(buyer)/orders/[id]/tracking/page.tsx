@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useOrderDetail } from "@/hooks/useOrderDetail";
-import { formatDate, getOrderHistories } from "@/lib/orderUtils";
+import { formatDate, getOrderHistories } from "@/lib/ordering/orderUtils";
 import { OrderStatus } from "@/types/order";
 import OrderStatusBadge from "@/components/ordering/OrderStatusBadge";
 

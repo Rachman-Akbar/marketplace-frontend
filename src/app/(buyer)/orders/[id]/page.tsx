@@ -10,7 +10,7 @@ import {
   getOrderHistories,
   getOrderItems,
   resolveShippingAddress,
-} from "@/lib/orderUtils";
+} from "@/lib/ordering/orderUtils";
 import OrderItemsTable from "@/components/ordering/OrderItemsTable";
 import OrderStatusBadge from "@/components/ordering/OrderStatusBadge";
 import OrderSummaryBox from "@/components/ordering/OrderSummaryBox";

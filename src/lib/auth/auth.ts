@@ -4,9 +4,9 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { api } from "@/lib/axios";
 import { auth } from "@/lib/firebase";
 
-import type { AuthResponse, AuthSession } from "@/lib/auth-session";
+import type { AuthResponse, AuthSession } from "@/lib/auth/auth-session";
 
-export type { AuthUser, AuthResponse, AuthSession } from "@/lib/auth-session";
+export type { AuthUser, AuthResponse, AuthSession } from "@/lib/auth/auth-session";
 
 export {
   AUTH_STORAGE_KEY,
@@ -14,7 +14,7 @@ export {
   saveAuthSession,
   getAuthSession,
   clearAuthSession,
-} from "@/lib/auth-session";
+} from "@/lib/auth/auth-session";
 
 /* =====================================================
    REGISTER
@@ -79,7 +79,7 @@ export async function verifyAuthSession(
 }
 
 export async function getVerifiedAuthSession(): Promise<AuthSession | null> {
-  const { getAuthSession, clearAuthSession } = await import("@/lib/auth-session");
+  const { getAuthSession, clearAuthSession } = await import("@/lib/auth/auth-session");
 
   const session = getAuthSession();
 

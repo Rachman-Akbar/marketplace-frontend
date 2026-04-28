@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ProfileLogoutButton } from "@/components/auth/ProfileLogoutButton";
-import { type AuthUser, getVerifiedAuthSession } from "@/lib/auth";
+import { type AuthUser, getVerifiedAuthSession } from "@/lib/auth/auth";
 
 function splitName(fullName: string | null): { firstName: string; lastName: string } {
   if (!fullName || !fullName.trim()) {

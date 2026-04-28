@@ -1,7 +1,7 @@
 // src/lib/axios.ts
 
 import axios from "axios";
-import { AUTH_STORAGE_KEY } from "@/lib/auth-session";
+import { AUTH_STORAGE_KEY } from "@/lib/auth/auth-session";
 
 export const API_ORIGIN =
   process.env.NEXT_PUBLIC_API_ORIGIN ?? "http://localhost:8000";

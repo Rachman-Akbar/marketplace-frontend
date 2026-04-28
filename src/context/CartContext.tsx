@@ -6,7 +6,7 @@ import {
   getCart,
   removeCartItem,
   updateCartItem,
-} from '@/lib/cartApiService';
+} from '@/lib/cart/cartApiService';
 import type { Cart } from '@/types/cart';
 import {
   createContext,

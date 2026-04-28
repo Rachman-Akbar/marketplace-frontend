@@ -12,11 +12,9 @@ import {
   loginWithFirebaseAction,
   registerWithPassword,
   saveAuthSession,
-} from "@/lib/auth";
+} from "@/lib/auth/auth";
 import { getAxiosErrorMessage } from "@/lib/axios";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
+import { Button, Card, Input } from "@/components/auth";
 
 export default function RegisterPage() {
   const router = useRouter();

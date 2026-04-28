@@ -1,17 +1,17 @@
 import Link from "next/link";
-import { ProductCard } from "@/components/ui/ProductCard";
-import { BannerCard } from "@/components/ui/BannerCard";
-import { CatalogGroupCard } from "@/components/ui/CatalogGroupCard";
-import { CategoryCard } from "@/components/ui/CategoryCard";
-import { StoreCard } from "@/components/ui/StoreCard";
-import { catalogService } from "@/lib/catalogService";
+import { ProductCard } from "@/components/catalog/ProductCard";
+import { BannerCard } from "@/components/catalog/BannerCard";
+import { CatalogGroupCard } from "@/components/catalog/CatalogGroupCard";
+import { CategoryCard } from "@/components/catalog/CategoryCard";
+import { StoreCard } from "@/components/catalog/StoreCard";
+import { catalogService } from "@/lib/catalog/catalogService";
 import {
   toBannerRoute,
   toProductRoute,
   toCategoryProductsRoute,
   toCatalogGroupProductsRoute,
   toStoreRoute,
-} from "@/lib/catalogRoutes";
+} from "@/lib/catalog/catalogRoutes";
 import { logApiError } from "@/lib/logApiError";
 
 const PLACEHOLDER_IMAGE = "/images/placeholder.svg";

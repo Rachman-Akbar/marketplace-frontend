@@ -2,10 +2,8 @@
 
 import { FormEvent, useState } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
-import { Input } from "@/components/ui/Input";
-import { sendResetPasswordEmail } from "@/lib/auth";
+import { Button, Card, Input } from "@/components/auth";
+import { sendResetPasswordEmail } from "@/lib/auth/auth";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");

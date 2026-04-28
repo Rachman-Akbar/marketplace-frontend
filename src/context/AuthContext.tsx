@@ -18,7 +18,7 @@ import {
   getVerifiedAuthSession,
   loginWithFirebaseAction,
   saveAuthSession,
-} from "@/lib/auth";
+} from "@/lib/auth/auth";
 
 interface AuthContextType {
   firebaseUser: User | null;

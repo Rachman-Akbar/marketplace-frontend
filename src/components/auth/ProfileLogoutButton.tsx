@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { logout } from "@/lib/logout";
+import { logout } from "@/lib/auth/logout";
 
 export function ProfileLogoutButton() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);

@@ -1,5 +1,3 @@
-// src/lib/auth-session.ts
-
 export type AuthUser = {
   id: string;
   firebase_uid: string | null;

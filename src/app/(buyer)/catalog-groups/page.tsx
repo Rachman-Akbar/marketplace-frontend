@@ -1,6 +1,6 @@
-import { catalogService } from "@/lib/catalogService";
-import { CatalogGroupCard } from "@/components/ui/CatalogGroupCard";
-import { toCatalogGroupProductsRoute } from "@/lib/catalogRoutes";
+import { catalogService } from "@/lib/catalog/catalogService";
+import { CatalogGroupCard } from "@/components/catalog/CatalogGroupCard";
+import { toCatalogGroupProductsRoute } from "@/lib/catalog/catalogRoutes";
 
 const PLACEHOLDER_IMAGE = "/images/placeholder.svg";
 

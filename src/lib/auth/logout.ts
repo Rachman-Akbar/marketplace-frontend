@@ -3,7 +3,7 @@
 import { signOut } from "firebase/auth";
 import { api } from "@/lib/axios";
 import { auth } from "@/lib/firebase";
-import { clearAuthSession, getAuthSession } from "@/lib/auth";
+import { clearAuthSession, getAuthSession } from "@/lib/auth/auth";
 
 export async function logout(): Promise<void> {
   const session = getAuthSession();

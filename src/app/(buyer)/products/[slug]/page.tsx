@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { catalogService } from "@/lib/catalogService";
+import { catalogService } from "@/lib/catalog/catalogService";
 
 type PageProps = {
   params: Promise<{

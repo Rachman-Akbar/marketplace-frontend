@@ -1,119 +1,243 @@
+"use client";
+
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCreateOrder } from "@/hooks/useCreateOrder";
+import { CreateOrderPayload } from "@/types/order";
+
 export default function CheckoutPage() {
+  const router = useRouter();
+  const { createOrder, loading, error, validationErrors } = useCreateOrder();
+
+  const [form, setForm] = useState<CreateOrderPayload>({
+    shipping_address: {
+      recipient_name: "",
+      phone: "",
+      address_line: "",
+      province: "",
+      city: "",
+      district: "",
+      postal_code: "",
+      notes: "",
+    },
+    payment_method: "manual_transfer",
+    notes: "",
+  });
+
+  function updateShippingAddress(
+    key: keyof CreateOrderPayload["shipping_address"],
+    value: string,
+  ) {
+    setForm((prev) => ({
+      ...prev,
+      shipping_address: {
+        ...prev.shipping_address,
+        [key]: value,
+      },
+    }));
+  }
+
+  function updateField(key: keyof CreateOrderPayload, value: string) {
+    setForm((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const order = await createOrder(form);
+
+    router.push(`/orders/success?order_id=${order.id}`);
+  }
+
   return (
     <div className="space-y-10">
       <header>
-        <h1 className="text-5xl font-extrabold tracking-tight text-slate-900">Secure Checkout</h1>
-        <p className="mt-2 text-slate-500">Complete your order to bring the curated collection home.</p>
+        <h1 className="text-5xl font-extrabold tracking-tight text-slate-900">
+          Secure Checkout
+        </h1>
+        <p className="mt-2 text-slate-500">
+          Lengkapi alamat pengiriman untuk membuat order dari cart aktif.
+        </p>
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-12">
+      <form onSubmit={handleSubmit} className="grid gap-8 lg:grid-cols-12">
         <section className="space-y-6 lg:col-span-8">
           <div className="rounded-xl bg-slate-200/55 p-7">
-            <div className="mb-5 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">1</span>
-                <h2 className="text-3xl font-bold tracking-tight">Shipping Address</h2>
-              </div>
-              <button className="text-sm font-semibold text-emerald-700">Add New</button>
+            <div className="mb-5 flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
+                1
+              </span>
+              <h2 className="text-3xl font-bold tracking-tight">
+                Shipping Address
+              </h2>
             </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <input
+                value={form.shipping_address.recipient_name}
+                onChange={(e) =>
+                  updateShippingAddress("recipient_name", e.target.value)
+                }
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700"
+                placeholder="Nama penerima"
+              />
+
+              <input
+                value={form.shipping_address.phone}
+                onChange={(e) => updateShippingAddress("phone", e.target.value)}
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700"
+                placeholder="Nomor HP"
+              />
+
+              <textarea
+                value={form.shipping_address.address_line}
+                onChange={(e) =>
+                  updateShippingAddress("address_line", e.target.value)
+                }
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700 md:col-span-2"
+                placeholder="Alamat lengkap"
+                rows={3}
+              />
+
+              <input
+                value={form.shipping_address.province}
+                onChange={(e) =>
+                  updateShippingAddress("province", e.target.value)
+                }
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700"
+                placeholder="Provinsi"
+              />
+
+              <input
+                value={form.shipping_address.city}
+                onChange={(e) => updateShippingAddress("city", e.target.value)}
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700"
+                placeholder="Kota"
+              />
+
+              <input
+                value={form.shipping_address.district}
+                onChange={(e) =>
+                  updateShippingAddress("district", e.target.value)
+                }
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700"
+                placeholder="Kecamatan"
+              />
+
+              <input
+                value={form.shipping_address.postal_code}
+                onChange={(e) =>
+                  updateShippingAddress("postal_code", e.target.value)
+                }
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700"
+                placeholder="Kode pos"
+              />
+
+              <input
+                value={form.shipping_address.notes ?? ""}
+                onChange={(e) => updateShippingAddress("notes", e.target.value)}
+                className="rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700 md:col-span-2"
+                placeholder="Catatan alamat"
+              />
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-slate-200/55 p-7">
+            <div className="mb-5 flex items-center gap-3">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">
+                2
+              </span>
+              <h2 className="text-3xl font-bold tracking-tight">
+                Payment Method
+              </h2>
+            </div>
+
             <div className="grid gap-3 md:grid-cols-2">
-              <article className="rounded-xl border-2 border-emerald-700 bg-white p-5 shadow-sm">
-                <div className="mb-2 flex items-start justify-between">
-                  <p className="font-bold text-slate-900">Emma Richardson</p>
-                  <span className="material-symbols-outlined text-emerald-700">check_circle</span>
-                </div>
-                <p className="text-sm leading-6 text-slate-600">742 Evergreen Terrace<br/>Springfield, IL 62704<br/>United States</p>
-                <p className="mt-4 text-[11px] font-bold uppercase tracking-widest text-emerald-700">Primary Address</p>
-              </article>
+              <button
+                type="button"
+                onClick={() => updateField("payment_method", "manual_transfer")}
+                className={`rounded-xl border-2 py-4 font-semibold ${
+                  form.payment_method === "manual_transfer"
+                    ? "border-emerald-700 bg-white text-emerald-700"
+                    : "border-slate-300 bg-slate-100 text-slate-500"
+                }`}
+              >
+                Manual Transfer
+              </button>
 
-              <article className="rounded-xl border border-slate-300 bg-slate-100 p-5">
-                <p className="font-bold text-slate-900">Emma Richardson</p>
-                <p className="mt-1 text-sm leading-6 text-slate-600">1200 Avenue of the Americas<br/>New York, NY 10036<br/>United States</p>
-              </article>
+              <button
+                type="button"
+                onClick={() => updateField("payment_method", "cod")}
+                className={`rounded-xl border-2 py-4 font-semibold ${
+                  form.payment_method === "cod"
+                    ? "border-emerald-700 bg-white text-emerald-700"
+                    : "border-slate-300 bg-slate-100 text-slate-500"
+                }`}
+              >
+                COD
+              </button>
             </div>
+
+            <textarea
+              value={form.notes ?? ""}
+              onChange={(e) => updateField("notes", e.target.value)}
+              className="mt-5 w-full rounded-lg bg-white px-4 py-3 outline-none ring-1 ring-slate-200 focus:ring-2 focus:ring-emerald-700"
+              placeholder="Catatan order"
+              rows={3}
+            />
           </div>
 
-          <div className="rounded-xl bg-slate-200/55 p-7">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">2</span>
-              <h2 className="text-3xl font-bold tracking-tight">Shipping Method</h2>
+          {error ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {error}
             </div>
-            <div className="space-y-3">
-              <label className="flex items-center justify-between rounded-xl bg-white p-4">
-                <div className="flex items-center gap-3">
-                  <input defaultChecked type="radio" name="ship" className="h-4 w-4 accent-emerald-700" />
-                  <div>
-                    <p className="font-semibold">Standard Courier</p>
-                    <p className="text-xs text-slate-500">Estimated delivery: 3-5 business days</p>
-                  </div>
-                </div>
-                <p className="font-bold text-emerald-700">$12.00</p>
-              </label>
-              <label className="flex items-center justify-between rounded-xl bg-white p-4">
-                <div className="flex items-center gap-3">
-                  <input type="radio" name="ship" className="h-4 w-4 accent-emerald-700" />
-                  <div>
-                    <p className="font-semibold">Express Premium</p>
-                    <p className="text-xs text-slate-500">Guaranteed delivery: 1-2 business days</p>
-                  </div>
-                </div>
-                <p className="font-bold text-emerald-700">$35.00</p>
-              </label>
-            </div>
-          </div>
+          ) : null}
 
-          <div className="rounded-xl bg-slate-200/55 p-7">
-            <div className="mb-5 flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700 text-sm font-bold text-white">3</span>
-              <h2 className="text-3xl font-bold tracking-tight">Payment Method</h2>
+          {validationErrors ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {Object.entries(validationErrors).map(([field, messages]) => (
+                <p key={field}>
+                  <strong>{field}</strong>: {messages.join(", ")}
+                </p>
+              ))}
             </div>
-            <div className="grid gap-3 md:grid-cols-3">
-              <button className="rounded-xl border-2 border-emerald-700 bg-white py-4 font-semibold">Credit Card</button>
-              <button className="rounded-xl border border-slate-300 bg-slate-100 py-4 font-semibold text-slate-500">PayPal</button>
-              <button className="rounded-xl border border-slate-300 bg-slate-100 py-4 font-semibold text-slate-500">Apple Pay</button>
-            </div>
-            <div className="mt-5 grid gap-3 md:grid-cols-2">
-              <input className="rounded-lg bg-slate-100 px-4 py-3 md:col-span-2" placeholder="•••• •••• •••• 4242" />
-              <input className="rounded-lg bg-slate-100 px-4 py-3" placeholder="MM/YY" />
-              <input className="rounded-lg bg-slate-100 px-4 py-3" placeholder="CVC / CVV" />
-            </div>
-          </div>
+          ) : null}
         </section>
 
         <aside className="h-fit rounded-xl bg-white p-6 shadow-sm lg:col-span-4">
           <h2 className="text-3xl font-bold tracking-tight">Order Summary</h2>
 
-          <div className="mt-4 space-y-3">
-            <div className="flex items-center gap-3 rounded-lg bg-slate-100 p-2">
-              <img className="h-16 w-16 rounded-md object-cover" src="https://images.unsplash.com/photo-1616628182509-6f6f58f7f0d7?w=400&q=80&auto=format&fit=crop" alt="item" />
-              <div>
-                <p className="text-sm font-semibold">Minimalist Obsidian Sculpture</p>
-                <p className="text-xs text-slate-500">Edition: 1 of 50</p>
-                <p className="text-sm font-bold text-emerald-700">$420.00</p>
-              </div>
+          <div className="mt-5 rounded-lg bg-slate-100 p-4 text-sm text-slate-600">
+            Order akan dibuat dari cart aktif kamu. Pastikan cart sudah berisi
+            produk.
+          </div>
+
+          <div className="mt-5 space-y-2 text-sm text-slate-600">
+            <div className="flex justify-between">
+              <span>Cart</span>
+              <span>Active cart</span>
             </div>
-            <div className="flex items-center gap-3 rounded-lg bg-slate-100 p-2">
-              <img className="h-16 w-16 rounded-md object-cover" src="https://images.unsplash.com/photo-1582735689369-4fe89db7114c?w=400&q=80&auto=format&fit=crop" alt="item" />
-              <div>
-                <p className="text-sm font-semibold">Hand-woven Silk Tapestry</p>
-                <p className="text-xs text-slate-500">Large / Natural Dye</p>
-                <p className="text-sm font-bold text-emerald-700">$1,250.00</p>
-              </div>
+
+            <div className="flex justify-between">
+              <span>Payment</span>
+              <span className="capitalize">
+                {form.payment_method?.replaceAll("_", " ")}
+              </span>
             </div>
           </div>
 
-          <div className="mt-5 space-y-2 text-slate-600">
-            <div className="flex justify-between"><span>Subtotal</span><span>$1,670.00</span></div>
-            <div className="flex justify-between"><span>Shipping</span><span>$12.00</span></div>
-            <div className="flex justify-between"><span>Estimated Tax</span><span>$133.60</span></div>
-          </div>
-
-          <p className="mt-5 text-right text-xs text-slate-400">Including VAT</p>
-          <p className="text-5xl font-extrabold text-emerald-700">$1,815.60</p>
-          <button className="mt-6 w-full rounded-lg bg-emerald-700 py-3 font-bold text-white">Place Order</button>
-          <p className="mt-4 text-center text-[11px] font-semibold uppercase tracking-widest text-slate-400">Secure • 30-day returns</p>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-6 w-full rounded-lg bg-emerald-700 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? "Creating Order..." : "Place Order"}
+          </button>
         </aside>
-      </div>
+      </form>
     </div>
   );
 }

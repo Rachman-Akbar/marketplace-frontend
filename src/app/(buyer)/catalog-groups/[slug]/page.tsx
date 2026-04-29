@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
-import { catalogService } from "@/lib/catalog/catalogService";
+import { catalogService } from "@/domains/catalog/services/catalogService";
 import { ProductCard } from "@/components/catalog/ProductCard";
 import { CategoryCard } from "@/components/catalog/CategoryCard";
 import {
   toProductRoute,
   toCategoryProductsRoute,
-} from "@/lib/catalog/catalogRoutes";
+} from "@/domains/catalog/services/catalogRoutes";
 
 type PageProps = {
   params: Promise<{ slug: string }>;

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { serverApi } from "../serverApi";
+import { serverApi } from "../../../lib/serverApi";
 
 const FULL_LIST_PARAMS = {
   per_page: 100,

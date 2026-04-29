@@ -1,32 +1,15 @@
 import "server-only";
 
-import { serverGet } from "@/lib/http/serverApi";
+import { catalogGet, type ApiListResponse, unwrapList } from "./catalogApi";
 
 import type {
   Banner,
   CatalogGroup,
   Category,
+  HomepageData,
   Product,
   Store,
-} from "./types";
-
-export type HomepageData = {
-  banners: Banner[];
-  products: Product[];
-  categories: Category[];
-  catalogGroups: CatalogGroup[];
-  stores: Store[];
-  hasPartialError: boolean;
-};
-
-type ApiListResponse<T> = T[] | {
-  data?: T[];
-};
-
-function unwrapList<T>(response: ApiListResponse<T>): T[] {
-  if (Array.isArray(response)) return response;
-  return response.data ?? [];
-}
+} from "../types";
 
 async function safeGetList<T>(
   path: string,
@@ -36,7 +19,7 @@ async function safeGetList<T>(
   failed: boolean;
 }> {
   try {
-    const response = await serverGet<ApiListResponse<T>>(path, {
+    const response = await catalogGet<ApiListResponse<T>>(path, {
       revalidate: 60,
       searchParams,
     });

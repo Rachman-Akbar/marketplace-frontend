@@ -50,24 +50,33 @@ export type Product = {
   name: string;
   slug: string;
   description?: string | null;
-  price: number;
-  stock?: number;
+  price: number | string;
+  stock?: number | null;
   thumbnail?: string | null;
-  status?: string;
+  status?: string | null;
   category_id?: number | null;
   store_id?: number | null;
   seller_id?: string | null;
-  category?: {
-    id?: number;
-    name?: string;
-    slug?: string;
-    image_url?: string | null;
-  } | null;
-  store?: {
-    id?: number;
-    name?: string;
-    slug?: string;
-    logo_url?: string | null;
-  } | null;
+  category?: Category | null;
+  store?: Store | null;
   images?: ProductImage[];
+};
+
+export type ProductCardItem = {
+  id: number;
+  title: string;
+  image: string;
+  price: number;
+  metaText: string;
+  soldText?: string;
+  href: string;
+};
+
+export type HomepageData = {
+  banners: Banner[];
+  products: Product[];
+  categories: Category[];
+  catalogGroups: CatalogGroup[];
+  stores: Store[];
+  hasPartialError: boolean;
 };

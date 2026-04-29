@@ -1,9 +1,9 @@
 import { CategoryCard } from "@/components/catalog/CategoryCard";
 import { SectionHeader } from "@/components/catalog/SectionHeader";
-import { toCategoryProductsRoute } from "@/lib/catalog/catalogRoutes";
-import { PLACEHOLDER_IMAGE } from "@/lib/catalog/homepageMapper";
+import { toCategoryProductsRoute } from "@/domains/catalog/services/catalogRoutes";
+import { CATALOG_PLACEHOLDER_IMAGE } from "@/domains/catalog";
 
-import type { Category } from "@/lib/catalog/types";
+import type { Category } from "@/domains/catalog/types";
 
 export function CategoriesSection({
   categories,
@@ -29,7 +29,7 @@ export function CategoriesSection({
               imageUrl={
                 category.image_url ||
                 category.cover_image_url ||
-                PLACEHOLDER_IMAGE
+                CATALOG_PLACEHOLDER_IMAGE
               }
             />
           ))

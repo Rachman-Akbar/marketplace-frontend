@@ -1,9 +1,9 @@
 import { StoreCard } from "@/components/catalog/StoreCard";
 import { SectionHeader } from "@/components/catalog/SectionHeader";
-import { toStoreRoute } from "@/lib/catalog/catalogRoutes";
-import { PLACEHOLDER_IMAGE } from "@/lib/catalog/homepageMapper";
+import { toStoreRoute } from "@/domains/catalog/services/catalogRoutes";
+import { CATALOG_PLACEHOLDER_IMAGE } from "@/domains/catalog";
 
-import type { Store } from "@/lib/catalog/types";
+import type { Store } from "@/domains/catalog/types";
 
 export function StoresSection({ stores }: { stores: Store[] }) {
   return (
@@ -22,7 +22,7 @@ export function StoresSection({ stores }: { stores: Store[] }) {
               name={store.name}
               slug={store.slug}
               href={toStoreRoute(store.slug)}
-              logoUrl={store.logo_url || PLACEHOLDER_IMAGE}
+              logoUrl={store.logo_url || CATALOG_PLACEHOLDER_IMAGE}
             />
           ))
         ) : (

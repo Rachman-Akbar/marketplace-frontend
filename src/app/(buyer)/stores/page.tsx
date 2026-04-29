@@ -1,6 +1,6 @@
-import { catalogService } from "@/lib/catalog/catalogService";
+import { catalogService } from "@/domains/catalog/services/catalogService";
 import { StoreCard } from "@/components/catalog/StoreCard";
-import { toStoreRoute } from "@/lib/catalog/catalogRoutes";
+import { toStoreRoute } from "@/domains/catalog/services/catalogRoutes";
 
 export default async function StoresPage() {
   const stores: any = await catalogService.getStores({all: true});

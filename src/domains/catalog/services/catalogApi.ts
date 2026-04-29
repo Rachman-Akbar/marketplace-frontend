@@ -20,6 +20,33 @@ export type PaginatedResponse<T> = {
 
 export type ApiListResponse<T> = T[] | PaginatedResponse<T>;
 
+export class CatalogApiError extends Error {
+  status: number;
+  statusText: string;
+  url: string;
+  data: unknown;
+
+  constructor({
+    status,
+    statusText,
+    url,
+    data,
+  }: {
+    status: number;
+    statusText: string;
+    url: string;
+    data: unknown;
+  }) {
+    super(`Catalog request failed: ${status} ${statusText}`);
+
+    this.name = "CatalogApiError";
+    this.status = status;
+    this.statusText = statusText;
+    this.url = url;
+    this.data = data;
+  }
+}
+
 function buildCatalogUrl(
   path: string,
   searchParams?: CatalogRequestOptions["searchParams"],
@@ -35,6 +62,18 @@ function buildCatalogUrl(
   return url.toString();
 }
 
+async function readErrorData(response: Response): Promise<unknown> {
+  try {
+    return await response.json();
+  } catch {
+    try {
+      return await response.text();
+    } catch {
+      return null;
+    }
+  }
+}
+
 export function unwrapList<T>(response: ApiListResponse<T>): T[] {
   if (Array.isArray(response)) {
     return response;
@@ -44,11 +83,7 @@ export function unwrapList<T>(response: ApiListResponse<T>): T[] {
 }
 
 export function unwrapItem<T>(response: T | { data?: T }): T | null {
-  if (
-    response &&
-    typeof response === "object" &&
-    "data" in response
-  ) {
+  if (response && typeof response === "object" && "data" in response) {
     return response.data ?? null;
   }
 
@@ -65,23 +100,29 @@ export async function catalogGet<T>(
   path: string,
   options: CatalogRequestOptions = {},
 ): Promise<T> {
-  const response = await fetch(
-    buildCatalogUrl(path, options.searchParams),
-    {
-      headers: {
-        Accept: "application/json",
-      },
-      next: {
-        revalidate: options.revalidate ?? 60,
-      },
+  const url = buildCatalogUrl(path, options.searchParams);
+
+  const response = await fetch(url, {
+    headers: {
+      Accept: "application/json",
     },
-  );
+    next: {
+      revalidate: options.revalidate ?? 60,
+    },
+  });
 
   if (!response.ok) {
-    throw new Error(
-      `Catalog request failed: ${response.status} ${response.statusText}`,
-    );
+    throw new CatalogApiError({
+      status: response.status,
+      statusText: response.statusText,
+      url,
+      data: await readErrorData(response),
+    });
   }
 
   return response.json() as Promise<T>;
+}
+
+export function isCatalogNotFoundError(error: unknown): boolean {
+  return error instanceof CatalogApiError && error.status === 404;
 }

@@ -1,8 +1,8 @@
 import {
   CatalogGroupGrid,
   CatalogGroupPageHeader,
-  catalogGroupService,
 } from "@/domains/catalog";
+import { catalogGroupService } from "@/domains/catalog/server";
 
 export default async function CatalogGroupsPage() {
   const catalogGroups = await catalogGroupService.getAllCatalogGroups();

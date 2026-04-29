@@ -1,8 +1,8 @@
 import {
   ProductGrid,
   ProductPageHeader,
-  productService,
 } from "@/domains/catalog";
+import { productService } from "@/domains/catalog/server";
 
 export default async function ProductsPage() {
   const products = await productService.getAllProducts();

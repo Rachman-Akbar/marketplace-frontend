@@ -1,4 +1,5 @@
 export type {
+  Banner,
   Category,
   CatalogGroup,
   Store,
@@ -14,6 +15,7 @@ export {
 } from "./constants";
 
 export {
+  toBannerRoute,
   toProductRoute,
   toProductsRoute,
   toCategoryRoute,
@@ -21,11 +23,8 @@ export {
   toCatalogGroupRoute,
   toCatalogGroupProductsRoute,
   toStoreRoute,
+  toStoresRoute,
 } from "./services/catalogRoutes";
-
-export { categoryService } from "./services/categoryService";
-export { productService } from "./services/productService";
-export { catalogGroupService } from "./services/catalogGroupService";
 
 export { BuyerHomeView } from "./components/home/BuyerHomeView";
 
@@ -46,6 +45,20 @@ export {
   mapCatalogGroupToCard,
 } from "./utils/catalogGroupMapper";
 
+export {
+  mapHomepageBanner,
+  mapHomepageStoreToCard,
+  mapHomepageDataToViewModel,
+} from "./utils/homepageMapper";
+
+export type {
+  HomepageBannerViewModel,
+  HomepageStoreCardViewModel,
+  HomepageViewModel,
+} from "./utils/homepageMapper";
+
+export { SectionHeader } from "./components/SectionHeader";
+
 export { CategoryCard } from "./components/CategoryCard";
 export { CategoryGrid } from "./components/CategoryGrid";
 export { CategoryPageHeader } from "./components/CategoryPageHeader";
@@ -62,6 +75,8 @@ export { CatalogGroupGrid } from "./components/CatalogGroupGrid";
 export { CatalogGroupPageHeader } from "./components/CatalogGroupPageHeader";
 
 export { BannerSection } from "./components/home/BannerSection";
-
-
-export { getHomepageData } from "./services/homepageService";
+export { CatalogGroupsSection } from "./components/home/CatalogGroupsSection";
+export { CategoriesSection } from "./components/home/CategoriesSection";
+export { RecommendedProductsSection } from "./components/home/RecommendedProductsSection";
+export { StoresSection } from "./components/home/StoresSection";
+export { HomepageErrorAlert } from "./components/home/HomepageErrorAlert";

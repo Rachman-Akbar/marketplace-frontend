@@ -42,9 +42,7 @@ export type HomepageViewModel = {
 export function mapHomepageBanner(
   banner?: Banner,
 ): HomepageBannerViewModel | undefined {
-  if (!banner) {
-    return undefined;
-  }
+  if (!banner) return undefined;
 
   return {
     id: banner.id,

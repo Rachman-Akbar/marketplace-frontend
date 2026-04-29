@@ -1,4 +1,5 @@
-import type { HomepageData } from "../../services/homepageService";
+import type { HomepageData } from "../../types";
+import { mapHomepageDataToViewModel } from "../../utils/homepageMapper";
 
 import { BannerSection } from "./BannerSection";
 import { CatalogGroupsSection } from "./CatalogGroupsSection";
@@ -12,25 +13,18 @@ type BuyerHomeViewProps = {
 };
 
 export function BuyerHomeView({ data }: BuyerHomeViewProps) {
-  const {
-    banners,
-    products,
-    categories,
-    catalogGroups,
-    stores,
-    hasPartialError,
-  } = data;
+  const homepage = mapHomepageDataToViewModel(data);
 
   return (
     <div className="space-y-16 pb-16">
-      <BannerSection banner={banners[0]} />
+      <BannerSection banner={homepage.banner} />
 
-      {hasPartialError ? <HomepageErrorAlert /> : null}
+      {homepage.hasPartialError ? <HomepageErrorAlert /> : null}
 
-      <CatalogGroupsSection catalogGroups={catalogGroups} />
-      <CategoriesSection categories={categories} />
-      <RecommendedProductsSection products={products} />
-      <StoresSection stores={stores} />
+      <CatalogGroupsSection catalogGroups={homepage.catalogGroups} />
+      <CategoriesSection categories={homepage.categories} />
+      <RecommendedProductsSection products={homepage.products} />
+      <StoresSection stores={homepage.stores} />
     </div>
   );
 }

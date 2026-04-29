@@ -2,8 +2,8 @@ import "server-only";
 
 import {
   catalogGet,
+  isPaginatedResponse,
   type ApiListResponse,
-  type PaginatedResponse,
   unwrapList,
 } from "./catalogApi";
 
@@ -11,12 +11,6 @@ import type { Category, Product } from "../types";
 
 const CATEGORY_ENDPOINT = "/catalog/categories";
 const PRODUCT_ENDPOINT = "/catalog/products";
-
-function isPaginatedResponse<T>(
-  response: ApiListResponse<T>,
-): response is PaginatedResponse<T> {
-  return !Array.isArray(response) && typeof response === "object";
-}
 
 export const categoryService = {
   async getAllCategories(): Promise<Category[]> {
@@ -44,9 +38,7 @@ export const categoryService = {
     }
 
     const remainingPages = Array.from(
-      {
-        length: lastPage - 1,
-      },
+      { length: lastPage - 1 },
       (_, index) => index + 2,
     );
 
@@ -69,18 +61,9 @@ export const categoryService = {
   },
 
   async getCategoryBySlug(slug: string): Promise<Category | null> {
-    const response = await catalogGet<Category | { data?: Category }>(
-      `${CATEGORY_ENDPOINT}/${slug}`,
-      {
-        revalidate: 60,
-      },
-    );
+    const categories = await this.getAllCategories();
 
-    if ("data" in response) {
-      return response.data ?? null;
-    }
-
-    return response;
+    return categories.find((category) => category.slug === slug) ?? null;
   },
 
   async getProductsByCategorySlug(slug: string): Promise<Product[]> {
@@ -89,9 +72,10 @@ export const categoryService = {
       {
         revalidate: 60,
         searchParams: {
-          category: slug,
           category_slug: slug,
+          category: slug,
           per_page: 100,
+          include: "category,store,images",
         },
       },
     );

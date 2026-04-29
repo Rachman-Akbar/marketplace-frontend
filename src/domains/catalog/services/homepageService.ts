@@ -1,13 +1,13 @@
 import "server-only";
 
 import { catalogGet, type ApiListResponse, unwrapList } from "./catalogApi";
+import { productService } from "./productService";
 
 import type {
   Banner,
   CatalogGroup,
   Category,
   HomepageData,
-  Product,
   Store,
 } from "../types";
 
@@ -47,33 +47,38 @@ export async function getHomepageData(): Promise<HomepageData> {
     storesResult,
   ] = await Promise.all([
     safeGetList<Banner>("/catalog/banners", {
-      limit: 1,
       per_page: 1,
-      is_active: true,
     }),
 
-    safeGetList<Product>("/catalog/products", {
-      limit: 6,
-      per_page: 6,
-      status: "active",
-      include: "category,store,images",
-    }),
+    productService
+      .getProductsPage({
+        page: 1,
+        perPage: 8,
+      })
+      .then((result) => ({
+        data: result.products,
+        failed: false,
+      }))
+      .catch((error) => {
+        console.warn("Homepage products request failed:", error);
+
+        return {
+          data: [],
+          failed: true,
+        };
+      }),
 
     safeGetList<Category>("/catalog/categories", {
-      limit: 8,
       per_page: 8,
     }),
 
     safeGetList<CatalogGroup>("/catalog/catalog-groups", {
-      limit: 8,
       per_page: 8,
       include: "categories",
     }),
 
     safeGetList<Store>("/catalog/stores", {
-      limit: 8,
       per_page: 8,
-      is_active: true,
     }),
   ]);
 

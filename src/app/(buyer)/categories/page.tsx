@@ -1,8 +1,8 @@
 import {
   CategoryGrid,
   CategoryPageHeader,
-  categoryService,
 } from "@/domains/catalog";
+import { categoryService } from "@/domains/catalog/server";
 
 export default async function CategoriesPage() {
   const categories = await categoryService.getAllCategories();

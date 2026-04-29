@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Manrope, Playfair_Display } from "next/font/google";
-import { Footer } from "../components/layout/Footer";
-import { Header } from "../components/layout/Header";
+
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { Container } from "@/components/layout/Container";
 import { AppProviders } from "@/components/providers/AppProviders";
+
 import "./globals.css";
 
 const manrope = Manrope({
@@ -18,7 +20,8 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "The Curated Canvas",
-  description: "Buyer marketplace UI built with Next.js App Router and Tailwind CSS",
+  description:
+    "Buyer marketplace UI built with Next.js App Router and Tailwind CSS",
 };
 
 export default function RootLayout({
@@ -39,19 +42,19 @@ export default function RootLayout({
       </head>
 
       <body className="min-h-full bg-[var(--color-canvas)] text-[var(--color-text)]">
-        <AppProviders>
-          <div className="flex min-h-screen flex-col">
-            <Header />
+        <div className="flex min-h-screen flex-col">
+          <Header />
 
-            <main className="flex-1">
+          <main className="flex-1">
+            <AppProviders>
               <Container className="py-8 md:py-10">
                 {children}
               </Container>
-            </main>
+            </AppProviders>
+          </main>
 
-            <Footer />
-          </div>
-        </AppProviders>
+          <Footer />
+        </div>
       </body>
     </html>
   );

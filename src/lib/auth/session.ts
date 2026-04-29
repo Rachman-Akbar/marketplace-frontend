@@ -1,31 +1,22 @@
-export type AuthUser = {
-  id: string;
-  firebase_uid: string | null;
-  email: string;
-  name: string | null;
-  avatar: string | null;
-  is_email_verified: boolean;
-};
+import {
+  API_TOKEN_COOKIE,
+  AUTH_SESSION_CHANGED_EVENT,
+  AUTH_STORAGE_KEY,
+  COOKIE_MAX_AGE,
+} from "./constants";
 
-export type AuthResponse = {
-  user: AuthUser;
-  roles: string[];
-  active_role: string;
-  api_token: string;
-};
+import type { AuthResponse, AuthSession } from "./types";
 
-export type AuthSession = AuthResponse;
-
-export const AUTH_STORAGE_KEY = "ukomp.auth.session";
-export const AUTH_SESSION_CHANGED_EVENT = "ukomp:auth-session-changed";
-
-const API_TOKEN_COOKIE = "api_token";
-const COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+function dispatchAuthSessionChanged(): void {
+  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+}
 
 function setApiTokenCookie(token: string): void {
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+
   document.cookie = `${API_TOKEN_COOKIE}=${encodeURIComponent(
     token,
-  )}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+  )}; Path=/; Max-Age=${COOKIE_MAX_AGE}; SameSite=Lax${secure}`;
 }
 
 function clearApiTokenCookie(): void {
@@ -37,28 +28,27 @@ export function saveAuthSession(session: AuthResponse): void {
 
   localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
   setApiTokenCookie(session.api_token);
-  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+  dispatchAuthSessionChanged();
 }
 
 export function getAuthSession(): AuthSession | null {
   if (typeof window === "undefined") return null;
 
   const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+
   if (!raw) return null;
 
   try {
     const parsed = JSON.parse(raw) as Partial<AuthSession>;
 
-    if (!parsed?.api_token || !parsed?.user?.id) {
-      localStorage.removeItem(AUTH_STORAGE_KEY);
-      clearApiTokenCookie();
+    if (!parsed.api_token || !parsed.user?.id) {
+      clearAuthSession();
       return null;
     }
 
     return parsed as AuthSession;
   } catch {
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-    clearApiTokenCookie();
+    clearAuthSession();
     return null;
   }
 }
@@ -68,5 +58,5 @@ export function clearAuthSession(): void {
 
   localStorage.removeItem(AUTH_STORAGE_KEY);
   clearApiTokenCookie();
-  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+  dispatchAuthSessionChanged();
 }

@@ -1,64 +1,77 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+
+import { useAuth } from "@/context/AuthContext";
 
 type AuthRouteGuardProps = {
   children: ReactNode;
 };
 
+const guestOnlyPaths = ["/login", "/register"];
+
+const protectedPathPrefixes = [
+  "/profile",
+  "/cart",
+  "/checkout",
+  "/chat",
+  "/notifications",
+];
+
 function isGuestOnlyPath(pathname: string): boolean {
-  return pathname === "/login" || pathname === "/register";
+  return guestOnlyPaths.includes(pathname);
 }
 
 function isProtectedPath(pathname: string): boolean {
-  return (
-    pathname === "/profile" ||
-    pathname.startsWith("/profile/") ||
-    pathname === "/cart" ||
-    pathname.startsWith("/checkout") ||
-    pathname === "/chat" ||
-    pathname.startsWith("/chat/") ||
-    pathname === "/notifications" ||
-    pathname.startsWith("/notifications/")
+  return protectedPathPrefixes.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
   );
 }
 
 export function AuthRouteGuard({ children }: AuthRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
+
   const { backendSession, isLoading } = useAuth();
-  const [isReady, setIsReady] = useState(false);
+
+  const guestOnly = isGuestOnlyPath(pathname);
+  const protectedRoute = isProtectedPath(pathname);
+  const isLoggedIn = !!backendSession;
 
   useEffect(() => {
-    if (isLoading) {
-      setIsReady(false);
-      return;
-    }
+    if (isLoading) return;
 
-    const guestOnly = isGuestOnlyPath(pathname);
-    const protectedRoute = isProtectedPath(pathname);
-
-    if (protectedRoute && !backendSession) {
-      setIsReady(false);
+    if (protectedRoute && !isLoggedIn) {
       router.replace("/login");
       return;
     }
 
-    if (guestOnly && backendSession) {
-      setIsReady(false);
+    if (guestOnly && isLoggedIn) {
       router.replace("/");
-      return;
     }
+  }, [guestOnly, protectedRoute, isLoggedIn, isLoading, router]);
 
-    setIsReady(true);
-  }, [pathname, backendSession, isLoading, router]);
-
-  if (isLoading || !isReady) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">
         Loading...
+      </div>
+    );
+  }
+
+  if (protectedRoute && !isLoggedIn) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">
+        Redirecting...
+      </div>
+    );
+  }
+
+  if (guestOnly && isLoggedIn) {
+    return (
+      <div className="flex min-h-screen items-center justify-center text-sm text-slate-500">
+        Redirecting...
       </div>
     );
   }

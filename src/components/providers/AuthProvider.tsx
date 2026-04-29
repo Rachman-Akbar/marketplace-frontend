@@ -9,15 +9,15 @@ import {
   useMemo,
   useState,
 } from "react";
+
 import { onAuthStateChanged, User } from "firebase/auth";
 
 import { logApiError } from "@/lib/axios";
 import { auth } from "@/lib/firebase";
 
-import type { AuthSession } from "@/lib/auth";
-
 import {
   AUTH_SESSION_CHANGED_EVENT,
+  AuthSession,
   clearAuthSession,
   getAuthSession,
   getVerifiedAuthSession,
@@ -41,80 +41,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshSession = useCallback(async () => {
-    setIsLoading(true);
-
-    try {
-      const verifiedSession = await getVerifiedAuthSession();
-      setBackendSession(verifiedSession);
-    } finally {
-      setIsLoading(false);
-    }
+    const verifiedSession = await getVerifiedAuthSession();
+    setBackendSession(verifiedSession);
   }, []);
 
   useEffect(() => {
     let isMounted = true;
 
-    async function syncWithFirebaseUser(user: User) {
+    async function syncUser(user: User): Promise<void> {
       const existingSession = getAuthSession();
 
-      if (existingSession && isMounted) {
-        setBackendSession(existingSession);
-      }
-
-      /**
-       * Kalau local session ada, verify dulu.
-       * Kalau valid, pakai session itu.
-       * Kalau invalid, baru sync ulang dari Firebase token.
-       */
       if (existingSession) {
-        const verifiedSession = await getVerifiedAuthSession();
-
-        if (!isMounted) return;
-
-        if (verifiedSession) {
-          setBackendSession(verifiedSession);
-          return;
-        }
+        setBackendSession(existingSession);
+        return;
       }
 
-      const newSession = await syncFirebaseUserToBackend(user, {
-        forceRefreshToken: true,
-      });
+      const newSession = await syncFirebaseUserToBackend(user);
 
       if (!isMounted) return;
 
       setBackendSession(newSession);
-    }
-
-    async function syncWithoutFirebaseUser() {
-      const existingSession = getAuthSession();
-
-      /**
-       * Jangan langsung clear session hanya karena Firebase user null.
-       * Header server membaca cookie api_token.
-       * Jadi kita verify dulu backend session-nya.
-       */
-      if (!existingSession) {
-        clearAuthSession();
-        setBackendSession(null);
-        return;
-      }
-
-      if (isMounted) {
-        setBackendSession(existingSession);
-      }
-
-      const verifiedSession = await getVerifiedAuthSession();
-
-      if (!isMounted) return;
-
-      if (verifiedSession) {
-        setBackendSession(verifiedSession);
-        return;
-      }
-
-      clearAuthSession();
-      setBackendSession(null);
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -124,19 +70,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(user);
 
       try {
-        if (user) {
-          await syncWithFirebaseUser(user);
-        } else {
-          await syncWithoutFirebaseUser();
+        if (!user) {
+          clearAuthSession();
+          setBackendSession(null);
+          return;
         }
+
+        await syncUser(user);
       } catch (error) {
         logApiError("Auth sync failed:", error);
 
         const fallbackSession = getAuthSession();
-
-        if (isMounted) {
-          setBackendSession(fallbackSession);
-        }
+        setBackendSession(fallbackSession);
       } finally {
         if (isMounted) {
           setIsLoading(false);

@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { logout } from "@/lib/auth";
+import { logout } from "@/domains/auth";
 
 export function useLogout() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);

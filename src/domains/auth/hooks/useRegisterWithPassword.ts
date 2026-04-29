@@ -6,7 +6,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
 import { getAxiosErrorMessage } from "@/lib/axios";
-import { registerWithPassword, saveAuthSession } from "@/lib/auth";
+import { registerWithPassword, saveAuthSession } from "@/domains/auth";
 
 type RegisterWithEmailInput = {
   name: string;

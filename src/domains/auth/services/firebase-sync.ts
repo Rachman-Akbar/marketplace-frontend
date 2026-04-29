@@ -3,7 +3,7 @@ import type { User } from "firebase/auth";
 import { loginWithFirebaseAction } from "./api";
 import { saveAuthSession } from "./session";
 
-import type { AuthSession } from "./types";
+import type { AuthSession } from "../types";
 
 export async function syncFirebaseUserToBackend(
   user: User,

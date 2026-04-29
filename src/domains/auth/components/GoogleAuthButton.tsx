@@ -1,6 +1,6 @@
 "use client";
 
-import { useGoogleAuth } from "@/hooks/auth/useGoogleAuth";
+import { useGoogleAuth } from "@/domains/auth/hooks/useGoogleAuth";
 
 type GoogleAuthButtonProps = {
   loadingText?: string;

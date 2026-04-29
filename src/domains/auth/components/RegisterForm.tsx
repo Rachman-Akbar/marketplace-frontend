@@ -3,7 +3,7 @@
 import { FormEvent } from "react";
 import Link from "next/link";
 
-import { useRegisterWithPassword } from "@/hooks/auth/useRegisterWithPassword";
+import { useRegisterWithPassword } from "@/domains/auth/hooks/useRegisterWithPassword";
 
 import { AuthAlert } from "./AuthAlert";
 import { AuthField } from "./AuthField";

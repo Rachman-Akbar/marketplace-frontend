@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "firebase/auth";
 
 import { getAxiosErrorMessage } from "@/lib/axios";
-import { syncFirebaseUserToBackend } from "@/lib/auth";
+import { syncFirebaseUserToBackend } from "@/domains/auth";
 
 export function useAuthSubmit(defaultErrorMessage: string) {
   const router = useRouter();

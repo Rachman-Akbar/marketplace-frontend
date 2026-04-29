@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { logout } from "@/lib/auth";
+import { logout } from "@/domains/auth";
 
 type ProfileLogoutButtonProps = {
   className?: string;

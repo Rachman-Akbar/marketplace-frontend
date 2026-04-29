@@ -3,7 +3,7 @@
 import { FormEvent } from "react";
 import Link from "next/link";
 
-import { useForgotPassword } from "@/hooks/auth/useForgotPassword";
+import { useForgotPassword } from "@/domains/auth/hooks/useForgotPassword";
 
 import { AuthAlert } from "./AuthAlert";
 import { AuthField } from "./AuthField";

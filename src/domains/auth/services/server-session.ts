@@ -3,9 +3,9 @@ import "server-only";
 import { cookies } from "next/headers";
 
 import { API_BASE_URL } from "@/lib/http/config";
-import { API_TOKEN_COOKIE } from "@/lib/auth/constants";
+import { API_TOKEN_COOKIE } from "@/domains/auth/constants";
 
-import type { AuthResponse, AuthSession, AuthUser } from "@/lib/auth";
+import type { AuthResponse, AuthSession, AuthUser } from "@/domains/auth";
 
 type MeResponse =
   | AuthResponse

@@ -5,7 +5,7 @@ import { auth } from "@/lib/firebase";
 
 import { clearAuthSession, getAuthSession } from "./session";
 
-import type { AuthResponse, AuthSession } from "./types";
+import type { AuthResponse, AuthSession } from "../types";
 
 type RegisterWithPasswordPayload = {
   name: string;

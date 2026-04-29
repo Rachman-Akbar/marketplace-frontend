@@ -3,9 +3,9 @@ import {
   AUTH_SESSION_CHANGED_EVENT,
   AUTH_STORAGE_KEY,
   COOKIE_MAX_AGE,
-} from "./constants";
+} from "../constants";
 
-import type { AuthResponse, AuthSession } from "./types";
+import type { AuthResponse, AuthSession } from "../types";
 
 function dispatchAuthSessionChanged(): void {
   window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));

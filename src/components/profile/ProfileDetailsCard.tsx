@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/lib/auth";
+import type { AuthUser } from "@/domains/auth";
 import { splitName } from "@/lib/profile/profile-utils";
 
 type ProfileDetailsCardProps = {

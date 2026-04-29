@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 
 import { AuthProvider } from "@/context/AuthContext";
-import { AuthRouteGuard } from "@/components/auth/AuthRouteGuard";
+import { AuthRouteGuard } from "@/domains/auth/providers/AuthRouteGuard";
 import { CartProvider } from "@/context/CartContext";
 
 type AppProvidersProps = {

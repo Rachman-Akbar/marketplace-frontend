@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/lib/auth";
+import type { AuthUser } from "@/domains/auth";
 
 export function splitName(
   fullName: string | null | undefined,

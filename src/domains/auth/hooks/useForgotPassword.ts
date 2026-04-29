@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { sendResetPasswordEmail } from "@/lib/auth";
+import { sendResetPasswordEmail } from "@/domains/auth";
 
 const SUCCESS_MESSAGE =
   "Link reset password sudah dikirim. Silakan cek inbox atau folder spam.";

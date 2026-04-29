@@ -5,7 +5,7 @@ import Link from "next/link";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
-import { useAuthSubmit } from "@/hooks/auth/useAuthSubmit";
+import { useAuthSubmit } from "@/domains/auth/hooks/useAuthSubmit";
 
 import { AuthAlert } from "./AuthAlert";
 import { AuthField } from "./AuthField";

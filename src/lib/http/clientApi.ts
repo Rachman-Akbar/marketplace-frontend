@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { AUTH_STORAGE_KEY } from "@/lib/auth/constants";
+import { AUTH_STORAGE_KEY } from "@/domains/auth/constants";
 import { API_BASE_URL } from "./config";
 
 export const clientApi = axios.create({

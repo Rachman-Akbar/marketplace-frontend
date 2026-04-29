@@ -14,7 +14,7 @@ import { onAuthStateChanged, User } from "firebase/auth";
 import { logApiError } from "@/lib/axios";
 import { auth } from "@/lib/firebase";
 
-import type { AuthSession } from "@/lib/auth";
+import type { AuthSession } from "@/domains/auth";
 
 import {
   AUTH_SESSION_CHANGED_EVENT,
@@ -22,7 +22,7 @@ import {
   getAuthSession,
   getVerifiedAuthSession,
   syncFirebaseUserToBackend,
-} from "@/lib/auth";
+} from "@/domains/auth";
 
 interface AuthContextType {
   firebaseUser: User | null;

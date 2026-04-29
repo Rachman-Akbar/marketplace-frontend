@@ -22,7 +22,7 @@ import {
   getAuthSession,
   getVerifiedAuthSession,
   syncFirebaseUserToBackend,
-} from "@/lib/auth";
+} from "@/domains/auth";
 
 interface AuthContextType {
   firebaseUser: User | null;

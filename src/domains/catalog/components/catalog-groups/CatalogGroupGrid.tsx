@@ -1,5 +1,5 @@
-import type { CatalogGroup } from "../types";
-import { mapCatalogGroupToCard } from "../utils/catalogGroupMapper";
+import type { CatalogGroup } from "../../types";
+import { mapCatalogGroupToCard } from "../../utils/catalogGroupMapper";
 
 import { CatalogGroupCard } from "./CatalogGroupCard";
 

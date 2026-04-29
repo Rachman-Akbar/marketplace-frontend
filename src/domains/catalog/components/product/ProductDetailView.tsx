@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { formatPrice } from "../utils/catalogFormatters";
-import { toProductsRoute } from "../services/catalogRoutes";
+import { formatPrice } from "../../utils/catalogFormatters";
+import { toProductsRoute } from "../../services/catalogRoutes";
 
-import type { Product } from "../types";
+import type { Product } from "../../types";
 
 import { ProductImageGallery } from "./ProductImageGallery";
 import { ProductSellerCard } from "./ProductSellerCard";

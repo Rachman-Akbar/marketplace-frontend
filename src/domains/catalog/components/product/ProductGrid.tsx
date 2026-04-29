@@ -1,5 +1,5 @@
-import type { Product } from "../types";
-import { mapProductToCard } from "../utils/productMapper";
+import type { Product } from "../../types";
+import { mapProductToCard } from "../../utils/productMapper";
 
 import { ProductCard } from "./ProductCard";
 

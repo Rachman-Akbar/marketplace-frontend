@@ -1,6 +1,6 @@
 import type { CatalogGroup } from "../../types";
 
-import { CatalogGroupGrid } from "../CatalogGroupGrid";
+import { CatalogGroupGrid } from "../catalog-groups/CatalogGroupGrid";
 import { SectionHeader } from "../SectionHeader";
 
 type CatalogGroupsSectionProps = {

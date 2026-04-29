@@ -1,6 +1,6 @@
 import type { Product } from "../../types";
 
-import { ProductGrid } from "../ProductGrid";
+import { ProductGrid } from "../product/ProductGrid";
 import { SectionHeader } from "../SectionHeader";
 
 type RecommendedProductsSectionProps = {

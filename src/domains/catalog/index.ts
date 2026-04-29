@@ -59,20 +59,20 @@ export type {
 
 export { SectionHeader } from "./components/SectionHeader";
 
-export { CategoryCard } from "./components/CategoryCard";
-export { CategoryGrid } from "./components/CategoryGrid";
-export { CategoryPageHeader } from "./components/CategoryPageHeader";
+export { CategoryCard } from "./components/category/CategoryCard";
+export { CategoryGrid } from "./components/category/CategoryGrid";
+export { CategoryPageHeader } from "./components/category/CategoryPageHeader";
 
-export { ProductCard } from "./components/ProductCard";
-export { ProductGrid } from "./components/ProductGrid";
-export { ProductPageHeader } from "./components/ProductPageHeader";
-export { ProductImageGallery } from "./components/ProductImageGallery";
-export { ProductSellerCard } from "./components/ProductSellerCard";
-export { ProductDetailView } from "./components/ProductDetailView";
+export { ProductCard } from "./components/product/ProductCard";
+export { ProductGrid } from "./components/product/ProductGrid";
+export { ProductPageHeader } from "./components/product/ProductPageHeader";
+export { ProductImageGallery } from "./components/product/ProductImageGallery";
+export { ProductSellerCard } from "./components/product/ProductSellerCard";
+export { ProductDetailView } from "./components/product/ProductDetailView";
 
-export { CatalogGroupCard } from "./components/CatalogGroupCard";
-export { CatalogGroupGrid } from "./components/CatalogGroupGrid";
-export { CatalogGroupPageHeader } from "./components/CatalogGroupPageHeader";
+export { CatalogGroupCard } from "./components/catalog-groups/CatalogGroupCard";
+export { CatalogGroupGrid } from "./components/catalog-groups/CatalogGroupGrid";
+export { CatalogGroupPageHeader } from "./components/catalog-groups/CatalogGroupPageHeader";
 
 export { BannerSection } from "./components/home/BannerSection";
 export { CatalogGroupsSection } from "./components/home/CatalogGroupsSection";

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { STORE_PLACEHOLDER_IMAGE } from "../constants";
-import { toStoreRoute } from "../services/catalogRoutes";
+import { STORE_PLACEHOLDER_IMAGE } from "../../constants";
+import { toStoreRoute } from "../../services/catalogRoutes";
 
-import type { Store } from "../types";
+import type { Store } from "../../types";
 
 type ProductSellerCardProps = {
   store: Store;

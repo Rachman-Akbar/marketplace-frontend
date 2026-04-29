@@ -1,6 +1,6 @@
-import { resolveProductImage } from "../utils/productMapper";
+import { resolveProductImage } from "../../utils/productMapper";
 
-import type { Product } from "../types";
+import type { Product } from "../../types";
 
 type ProductImageGalleryProps = {
   product: Product;

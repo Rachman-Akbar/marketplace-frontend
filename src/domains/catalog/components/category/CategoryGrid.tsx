@@ -1,5 +1,5 @@
-import type { Category } from "../types";
-import { mapCategoryToCard } from "../utils/categoryMapper";
+import type { Category } from "../../types";
+import { mapCategoryToCard } from "../../utils/categoryMapper";
 import { CategoryCard } from "./CategoryCard";
 
 type CategoryGridProps = {

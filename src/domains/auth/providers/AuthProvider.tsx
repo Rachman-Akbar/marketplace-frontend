@@ -33,6 +33,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function isSessionForFirebaseUser(
+  session: AuthSession | null,
+  user: User | null,
+): session is AuthSession {
+  if (!session || !user) return false;
+
+  return session.user.firebase_uid === user.uid;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null);
   const [backendSession, setBackendSession] = useState<AuthSession | null>(
@@ -41,7 +50,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshSession = useCallback(async () => {
+    const currentFirebaseUser = auth.currentUser;
+
+    if (!currentFirebaseUser) {
+      clearAuthSession();
+      setBackendSession(null);
+      return;
+    }
+
     const verifiedSession = await getVerifiedAuthSession();
+
+    if (!isSessionForFirebaseUser(verifiedSession, currentFirebaseUser)) {
+      clearAuthSession();
+      setBackendSession(null);
+      return;
+    }
+
     setBackendSession(verifiedSession);
   }, []);
 
@@ -49,14 +73,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let isMounted = true;
 
     async function syncUser(user: User): Promise<void> {
-      const existingSession = getAuthSession();
+      const verifiedSession = await getVerifiedAuthSession();
 
-      if (existingSession) {
-        setBackendSession(existingSession);
+      if (isSessionForFirebaseUser(verifiedSession, user)) {
+        if (!isMounted) return;
+
+        setBackendSession(verifiedSession);
         return;
       }
 
-      const newSession = await syncFirebaseUserToBackend(user);
+      clearAuthSession();
+
+      const newSession = await syncFirebaseUserToBackend(user, {
+        forceRefreshToken: true,
+      });
 
       if (!isMounted) return;
 
@@ -81,7 +111,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logApiError("Auth sync failed:", error);
 
         const fallbackSession = getAuthSession();
-        setBackendSession(fallbackSession);
+
+        if (isSessionForFirebaseUser(fallbackSession, user)) {
+          setBackendSession(fallbackSession);
+        } else {
+          clearAuthSession();
+          setBackendSession(null);
+        }
       } finally {
         if (isMounted) {
           setIsLoading(false);
@@ -97,7 +133,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     function handleSessionChanged() {
-      setBackendSession(getAuthSession());
+      const currentFirebaseUser = auth.currentUser;
+      const session = getAuthSession();
+
+      if (!currentFirebaseUser) {
+        setBackendSession(null);
+        return;
+      }
+
+      if (isSessionForFirebaseUser(session, currentFirebaseUser)) {
+        setBackendSession(session);
+        return;
+      }
+
+      setBackendSession(null);
     }
 
     window.addEventListener(

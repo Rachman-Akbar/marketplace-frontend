@@ -11,7 +11,7 @@ export async function syncFirebaseUserToBackend(
     forceRefreshToken?: boolean;
   },
 ): Promise<AuthSession> {
-  const idToken = await user.getIdToken(options?.forceRefreshToken ?? false);
+  const idToken = await user.getIdToken(options?.forceRefreshToken ?? true);
 
   const session = await loginWithFirebaseAction({
     idToken,

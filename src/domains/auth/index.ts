@@ -15,13 +15,14 @@ export {
 
 export {
   loginWithFirebaseAction,
+  registerWithFirebase,
   registerWithPassword,
   verifyAuthSession,
   getVerifiedAuthSession,
   sendResetPasswordEmail,
 } from "./services/api";
 
-export { syncFirebaseUserToBackend } from "./services/firebase-sync";
+export { syncFirebaseUserToBackend } from "./services/syncFirebaseUserToBackend";
 export { logout } from "./services/logout";
 
 export { AuthProvider, useAuth } from "./providers/AuthProvider";

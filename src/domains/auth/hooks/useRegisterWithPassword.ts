@@ -2,11 +2,20 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signOut,
+  updateProfile,
+} from "firebase/auth";
 
 import { auth } from "@/lib/firebase";
 import { getAxiosErrorMessage } from "@/lib/axios";
-import { registerWithPassword, saveAuthSession } from "@/domains/auth";
+import {
+  clearAuthSession,
+  saveAuthSession,
+} from "@/domains/auth/services/session";
+
+import { registerWithFirebase } from "@/domains/auth/services/api";
 
 type RegisterWithEmailInput = {
   name: string;
@@ -63,20 +72,36 @@ export function useRegisterWithPassword() {
       setIsSubmitting(true);
 
       try {
-        const session = await registerWithPassword({
-          name: normalizedName,
-          email: normalizedEmail,
+        const credential = await createUserWithEmailAndPassword(
+          auth,
+          normalizedEmail,
           password,
-          passwordConfirmation,
+        );
+
+        await updateProfile(credential.user, {
+          displayName: normalizedName,
         });
 
-        await signInWithEmailAndPassword(auth, normalizedEmail, password);
+        const idToken = await credential.user.getIdToken(true);
+
+        const session = await registerWithFirebase({
+          idToken,
+          name: normalizedName,
+        });
 
         saveAuthSession(session);
 
         router.replace("/");
         router.refresh();
       } catch (submitError) {
+        clearAuthSession();
+
+        try {
+          await signOut(auth);
+        } catch {
+          // Abaikan. Tujuannya hanya memastikan state lokal bersih.
+        }
+
         setError(getAxiosErrorMessage(submitError, "Register gagal."));
       } finally {
         setIsSubmitting(false);

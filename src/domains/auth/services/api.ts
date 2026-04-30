@@ -3,21 +3,32 @@ import { sendPasswordResetEmail } from "firebase/auth";
 import { api } from "@/lib/axios";
 import { auth } from "@/lib/firebase";
 
-import { clearAuthSession, getAuthSession } from "./session";
+import { clearAuthSession, getAuthSession, saveAuthSession } from "./session";
 
-import type { AuthResponse, AuthSession } from "../types";
-
-type RegisterWithPasswordPayload = {
-  name: string;
-  email: string;
-  password: string;
-  passwordConfirmation: string;
-};
+import type { AuthResponse, AuthSession, AuthUser } from "../types";
 
 type RegisterWithFirebasePayload = {
   idToken: string;
   name?: string;
 };
+
+type MeResponse = {
+  user: AuthUser;
+  roles?: string[];
+  active_role?: string;
+};
+
+function normalizeSessionFromMe(
+  response: MeResponse,
+  apiToken: string,
+): AuthSession {
+  return {
+    user: response.user,
+    roles: response.roles ?? [],
+    active_role: response.active_role ?? "",
+    api_token: apiToken,
+  };
+}
 
 export async function loginWithFirebaseAction({
   idToken,
@@ -70,54 +81,19 @@ export async function registerWithFirebase({
   return response.data;
 }
 
-export async function registerWithPassword({
-  name,
-  email,
-  password,
-  passwordConfirmation,
-}: RegisterWithPasswordPayload): Promise<AuthResponse> {
-  const normalizedName = name.trim();
-  const normalizedEmail = email.trim().toLowerCase();
-
-  if (!normalizedName) {
-    throw new Error("Nama wajib diisi.");
-  }
-
-  if (!normalizedEmail) {
-    throw new Error("Email wajib diisi.");
-  }
-
-  if (!password) {
-    throw new Error("Password wajib diisi.");
-  }
-
-  if (password !== passwordConfirmation) {
-    throw new Error("Konfirmasi password tidak sama.");
-  }
-
-  const response = await api.post<AuthResponse>("/identity/auth/register", {
-    name: normalizedName,
-    email: normalizedEmail,
-    password,
-    password_confirmation: passwordConfirmation,
-  });
-
-  return response.data;
-}
-
 export async function verifyAuthSession(
   session: AuthSession,
-): Promise<boolean> {
+): Promise<AuthSession | null> {
   try {
-    await api.get("/identity/auth/me", {
+    const response = await api.get<MeResponse>("/identity/auth/me", {
       headers: {
         Authorization: `Bearer ${session.api_token}`,
       },
     });
 
-    return true;
+    return normalizeSessionFromMe(response.data, session.api_token);
   } catch {
-    return false;
+    return null;
   }
 }
 
@@ -128,14 +104,24 @@ export async function getVerifiedAuthSession(): Promise<AuthSession | null> {
     return null;
   }
 
-  const valid = await verifyAuthSession(session);
+  const verifiedSession = await verifyAuthSession(session);
 
-  if (!valid) {
+  if (!verifiedSession) {
     clearAuthSession();
     return null;
   }
 
-  return session;
+  saveAuthSession(verifiedSession);
+
+  return verifiedSession;
+}
+
+export async function logoutFromBackend(): Promise<void> {
+  try {
+    await api.post("/identity/auth/logout");
+  } finally {
+    clearAuthSession();
+  }
 }
 
 export async function sendResetPasswordEmail(email: string): Promise<void> {

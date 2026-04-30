@@ -1,13 +1,13 @@
-export function toProductRoute(slug: string): string {
-  return `/products/${slug}`;
+export function toProductRoute(slug: string) {
+  return `/products/${encodeURIComponent(slug)}`;
+}
+
+export function toCategoryRoute(slug: string) {
+  return `/categories/${encodeURIComponent(slug)}`;
 }
 
 export function toProductsRoute(): string {
   return "/products";
-}
-
-export function toCategoryRoute(slug: string): string {
-  return `/categories/${slug}`;
 }
 
 export function toCategoryProductsRoute(slug: string): string {

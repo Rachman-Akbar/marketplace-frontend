@@ -1,34 +1,64 @@
 import Link from "next/link";
-
-import { STORE_PLACEHOLDER_IMAGE } from "../../constants";
-import { toStoreRoute } from "../../services/catalogRoutes";
-
-import type { Store } from "../../types";
+import type { Product } from "../../types";
+import { toStoreRoute } from "@/domains/stores/services/storeRoutes";
 
 type ProductSellerCardProps = {
-  store: Store;
+  product: Product;
 };
 
-export function ProductSellerCard({ store }: ProductSellerCardProps) {
+export function ProductSellerCard({ product }: ProductSellerCardProps) {
+  const store = product.store;
+
+  if (!store) {
+    return (
+      <section className="rounded-2xl border bg-white p-5">
+        <h2 className="text-lg font-semibold">Informasi Toko</h2>
+        <p className="mt-2 text-sm text-gray-500">
+          Informasi toko belum tersedia.
+        </p>
+      </section>
+    );
+  }
+
+  const logoUrl =
+    store.logo_url ||
+    store.logo ||
+    "https://via.placeholder.com/120x120?text=Store";
+
   return (
-    <div className="mt-8 rounded-2xl border bg-white p-5">
-      <p className="text-sm text-gray-500">Sold by</p>
+    <section className="rounded-2xl border bg-white p-5">
+      <h2 className="text-lg font-semibold">Informasi Toko</h2>
 
-      <Link
-        href={toStoreRoute(store.slug)}
-        className="mt-2 flex items-center gap-3 hover:text-blue-600"
-      >
-        <img
-          src={store.logo_url || STORE_PLACEHOLDER_IMAGE}
-          alt={store.name}
-          className="h-12 w-12 rounded-full object-cover"
-        />
+      {store.slug ? (
+        <Link
+          href={toStoreRoute(store.slug)}
+          className="mt-4 flex items-center gap-3 rounded-xl p-2 transition hover:bg-gray-50"
+        >
+          <img
+            src={logoUrl}
+            alt={store.name ?? "Store"}
+            className="h-14 w-14 rounded-full object-cover"
+          />
 
-        <div>
-          <p className="font-semibold">{store.name}</p>
-          <p className="text-sm text-gray-500">@{store.slug}</p>
+          <div>
+            <p className="font-semibold">{store.name ?? "Toko"}</p>
+            <p className="text-sm text-gray-500">@{store.slug}</p>
+          </div>
+        </Link>
+      ) : (
+        <div className="mt-4 flex items-center gap-3 rounded-xl p-2">
+          <img
+            src={logoUrl}
+            alt={store.name ?? "Store"}
+            className="h-14 w-14 rounded-full object-cover"
+          />
+
+          <div>
+            <p className="font-semibold">{store.name ?? "Toko"}</p>
+            <p className="text-sm text-gray-500">Slug toko belum tersedia.</p>
+          </div>
         </div>
-      </Link>
-    </div>
+      )}
+    </section>
   );
 }

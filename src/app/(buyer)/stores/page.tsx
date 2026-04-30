@@ -1,10 +1,8 @@
-import { catalogService } from "@/domains/catalog/services/catalogService";
-import { StoreCard } from "@/components/catalog/StoreCard";
-import { toStoreRoute } from "@/domains/catalog/services/catalogRoutes";
+import { storeService } from "@/domains/stores/services/storeService";
+import { StoreGrid } from "@/domains/stores/components/StoreGrid";
 
 export default async function StoresPage() {
-  const stores: any = await catalogService.getStores({all: true});
-  const storeList = Array.isArray(stores) ? stores : [];
+  const stores = await storeService.getStores({ all: true });
 
   return (
     <main className="mx-auto max-w-[1440px] px-6 py-10">
@@ -16,21 +14,7 @@ export default async function StoresPage() {
       </section>
 
       <section className="mt-10">
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-          {storeList.length > 0 ? (
-            storeList.map((store: any) => (
-              <StoreCard
-                key={store.id}
-                name={store.name}
-                slug={store.slug}
-                href={toStoreRoute(store.slug)}
-                logoUrl={store.logo_url}
-              />
-            ))
-          ) : (
-            <p className="text-sm text-gray-500">Belum ada toko.</p>
-          )}
-        </div>
+        <StoreGrid stores={stores} />
       </section>
     </main>
   );

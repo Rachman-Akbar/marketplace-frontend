@@ -1,12 +1,8 @@
-import Link from "next/link";
-
-import { formatPrice } from "../../utils/catalogFormatters";
-import { toProductsRoute } from "../../services/catalogRoutes";
-
 import type { Product } from "../../types";
-
 import { ProductImageGallery } from "./ProductImageGallery";
 import { ProductSellerCard } from "./ProductSellerCard";
+import { ProductPurchaseCard } from "./ProductPurchaseCard";
+import { ProductTabs } from "./ProductTabs";
 
 type ProductDetailViewProps = {
   product: Product;
@@ -14,59 +10,58 @@ type ProductDetailViewProps = {
 
 export function ProductDetailView({ product }: ProductDetailViewProps) {
   return (
-    <main className="mx-auto max-w-[1440px] px-6 py-10">
-      <Link
-        href={toProductsRoute()}
-        className="mb-6 inline-block text-sm font-medium text-blue-600 hover:underline"
-      >
-        ← Kembali ke Products
-      </Link>
+    <main className="mx-auto w-full max-w-[1440px] overflow-hidden px-4 py-8 sm:px-6">
+      <section className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,420px)_minmax(0,1fr)_minmax(320px,360px)]">
+        <div className="min-w-0">
+          <ProductImageGallery product={product} />
+        </div>
 
-      <div className="grid gap-10 lg:grid-cols-2">
-        <ProductImageGallery product={product} />
-
-        <section>
+        <section className="min-w-0 rounded-2xl border bg-white p-6">
           <p className="text-sm text-gray-500">
-            {product.category?.name ?? "No Category"} •{" "}
-            {product.store?.name ?? "No Store"}
+            {product.category?.name ?? "Product"}
           </p>
 
-          <h1 className="mt-2 text-4xl font-bold">{product.name}</h1>
+          <h1 className="mt-2 break-words text-3xl font-bold leading-tight">
+            {product.name}
+          </h1>
 
-          <p className="mt-4 text-2xl font-bold">
-            {formatPrice(product.price)}
+          <p className="mt-5 break-words text-3xl font-bold">
+            Rp{Number(product.price).toLocaleString("id-ID")}
           </p>
 
-          {typeof product.stock === "number" ? (
-            <p className="mt-2 text-sm text-gray-500">
-              Stock: {product.stock}
-            </p>
-          ) : null}
+          <div className="mt-6 border-t pt-5">
+            <dl className="grid grid-cols-[100px_minmax(0,1fr)] gap-y-3 text-sm">
+              <dt className="text-gray-500">Kategori</dt>
+              <dd className="min-w-0 break-words">
+                {product.category?.name ?? "-"}
+              </dd>
 
-          {product.status ? (
-            <p className="mt-2 text-sm text-gray-500">
-              Status: {product.status}
-            </p>
-          ) : null}
+              <dt className="text-gray-500">Stok</dt>
+              <dd>{product.stock ?? "-"}</dd>
 
-          {product.description ? (
-            <p className="mt-6 leading-7 text-gray-600">
-              {product.description}
-            </p>
-          ) : null}
+              <dt className="text-gray-500">Status</dt>
+              <dd className="min-w-0 break-words">{product.status ?? "-"}</dd>
 
-          {product.store ? (
-            <ProductSellerCard store={product.store} />
-          ) : null}
+              <dt className="text-gray-500">Toko</dt>
+              <dd className="min-w-0 break-words">
+                {product.store?.name ?? "-"}
+              </dd>
+            </dl>
+          </div>
 
-          <button
-            type="button"
-            className="mt-8 w-full rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 md:w-auto"
-          >
-            Tambah ke Keranjang
-          </button>
+          <div className="mt-6">
+            <ProductSellerCard product={product} />
+          </div>
         </section>
-      </div>
+
+        <div className="min-w-0">
+          <ProductPurchaseCard product={product} />
+        </div>
+      </section>
+
+      <section className="mt-8 min-w-0">
+        <ProductTabs product={product} />
+      </section>
     </main>
   );
 }

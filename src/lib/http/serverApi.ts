@@ -11,7 +11,10 @@ function buildUrl(
   path: string,
   searchParams?: ServerGetOptions["searchParams"],
 ): string {
-  const url = new URL(`${API_BASE_URL}${path}`);
+  const normalizedBaseUrl = API_BASE_URL.replace(/\/$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
+  const url = new URL(`${normalizedBaseUrl}${normalizedPath}`);
 
   Object.entries(searchParams ?? {}).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== "") {
@@ -26,20 +29,34 @@ export async function serverGet<T>(
   path: string,
   options: ServerGetOptions = {},
 ): Promise<T> {
-  const response = await fetch(buildUrl(path, options.searchParams), {
+  const requestUrl = buildUrl(path, options.searchParams);
+
+  console.log(`[serverGet request] ${requestUrl}`);
+
+  const response = await fetch(requestUrl, {
     headers: {
       Accept: "application/json",
     },
-    next: {
-      revalidate: options.revalidate ?? 60,
-    },
+    cache: "no-store",
   });
 
   if (!response.ok) {
-    throw new Error(`Request failed: ${response.status} ${response.statusText}`);
+    const errorText = await response.text().catch(() => "");
+
+    const errorPayload = {
+      requestUrl,
+      responseUrl: response.url,
+      status: response.status,
+      statusText: response.statusText,
+      body: errorText,
+    };
+
+    console.error(`[serverGet error] ${JSON.stringify(errorPayload, null, 2)}`);
+
+    throw new Error(
+      `Request failed: ${response.status} ${response.statusText}. URL: ${requestUrl}. Body: ${errorText}`,
+    );
   }
 
-  const data = await response.json();
-
-  return data as T;
+  return (await response.json()) as T;
 }

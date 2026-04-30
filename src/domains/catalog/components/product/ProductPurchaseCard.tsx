@@ -1,18 +1,38 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { Product } from "../../types";
+import { auth } from "@/lib/firebase";
+import { AddToCartButton } from "@/domains/cart/components/add-to-cart-button";
 
 type ProductPurchaseCardProps = {
   product: Product;
 };
 
 export function ProductPurchaseCard({ product }: ProductPurchaseCardProps) {
+  const router = useRouter();
+
   const stock = Number(product.stock ?? 0);
+  const price = Number(product.price ?? 0);
   const [quantity, setQuantity] = useState(1);
 
-  const safeQuantity = Math.max(1, Math.min(quantity, Math.max(stock, 1)));
-  const subtotal = Number(product.price) * safeQuantity;
+  const isOutOfStock = stock <= 0;
+  const maxQuantity = Math.max(stock, 1);
+  const safeQuantity = Math.max(1, Math.min(quantity, maxQuantity));
+  const subtotal = price * safeQuantity;
+
+  function handleBuyNow() {
+    const user = auth.currentUser;
+
+    if (!user) {
+      window.alert("Silakan login terlebih dahulu untuk membeli produk.");
+      router.push("/login");
+      return;
+    }
+
+    router.push(`/checkout?product_id=${product.id}&quantity=${safeQuantity}`);
+  }
 
   return (
     <aside className="h-fit rounded-2xl border bg-white p-5 lg:sticky lg:top-24">
@@ -24,7 +44,8 @@ export function ProductPurchaseCard({ product }: ProductPurchaseCardProps) {
         <div className="flex items-center overflow-hidden rounded-xl border">
           <button
             type="button"
-            className="px-4 py-2"
+            disabled={isOutOfStock || safeQuantity <= 1}
+            className="px-4 py-2 disabled:cursor-not-allowed disabled:opacity-40"
             onClick={() => setQuantity((value) => Math.max(1, value - 1))}
           >
             -
@@ -34,23 +55,21 @@ export function ProductPurchaseCard({ product }: ProductPurchaseCardProps) {
 
           <button
             type="button"
-            className="px-4 py-2"
-            onClick={() =>
-              setQuantity((value) => Math.min(Math.max(stock, 1), value + 1))
-            }
+            disabled={isOutOfStock || safeQuantity >= stock}
+            className="px-4 py-2 disabled:cursor-not-allowed disabled:opacity-40"
+            onClick={() => setQuantity((value) => Math.min(maxQuantity, value + 1))}
           >
             +
           </button>
         </div>
       </div>
 
-      <p className="mt-2 text-right text-sm text-gray-500">
-        Stok: {stock}
-      </p>
+      <p className="mt-2 text-right text-sm text-gray-500">Stok: {stock}</p>
 
       <div className="mt-5 border-t pt-5">
         <div className="flex items-center justify-between">
           <span className="text-gray-500">Subtotal</span>
+
           <strong className="text-2xl">
             Rp{subtotal.toLocaleString("id-ID")}
           </strong>
@@ -58,16 +77,17 @@ export function ProductPurchaseCard({ product }: ProductPurchaseCardProps) {
       </div>
 
       <div className="mt-5 space-y-3">
-        <button
-          type="button"
-          className="w-full rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700"
-        >
-          + Keranjang
-        </button>
+        <AddToCartButton
+          productId={product.id}
+          quantity={safeQuantity}
+          stock={product.stock}
+        />
 
         <button
           type="button"
-          className="w-full rounded-xl border border-emerald-600 px-4 py-3 font-semibold text-emerald-700 hover:bg-emerald-50"
+          disabled={isOutOfStock}
+          onClick={handleBuyNow}
+          className="w-full rounded-xl border border-emerald-600 px-4 py-3 font-semibold text-emerald-700 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Beli Langsung
         </button>

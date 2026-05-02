@@ -18,6 +18,15 @@ type MeResponse = {
   active_role?: string;
 };
 
+function normalizeAuthResponse(response: AuthResponse): AuthSession {
+  return {
+    user: response.user,
+    roles: response.roles ?? [],
+    active_role: response.active_role ?? "",
+    api_token: response.api_token,
+  };
+}
+
 function normalizeSessionFromMe(
   response: MeResponse,
   apiToken: string,
@@ -34,7 +43,7 @@ export async function loginWithFirebaseAction({
   idToken,
 }: {
   idToken: string;
-}): Promise<AuthResponse> {
+}): Promise<AuthSession> {
   const token = idToken.trim();
 
   if (!token) {
@@ -43,7 +52,7 @@ export async function loginWithFirebaseAction({
 
   const response = await api.post<AuthResponse>(
     "/identity/auth/firebase-login",
-    null,
+    {},
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -52,13 +61,13 @@ export async function loginWithFirebaseAction({
     },
   );
 
-  return response.data;
+  return normalizeAuthResponse(response.data);
 }
 
 export async function registerWithFirebase({
   idToken,
   name,
-}: RegisterWithFirebasePayload): Promise<AuthResponse> {
+}: RegisterWithFirebasePayload): Promise<AuthSession> {
   const token = idToken.trim();
 
   if (!token) {
@@ -78,12 +87,16 @@ export async function registerWithFirebase({
     },
   );
 
-  return response.data;
+  return normalizeAuthResponse(response.data);
 }
 
 export async function verifyAuthSession(
   session: AuthSession,
 ): Promise<AuthSession | null> {
+  if (!session.api_token) {
+    return null;
+  }
+
   try {
     const response = await api.get<MeResponse>("/identity/auth/me", {
       headers: {

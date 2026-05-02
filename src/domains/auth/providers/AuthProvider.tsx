@@ -10,7 +10,8 @@ import {
   useState,
 } from "react";
 
-import { onAuthStateChanged, User } from "firebase/auth";
+import axios from "axios";
+import { onAuthStateChanged, signOut, User } from "firebase/auth";
 
 import { logApiError } from "@/lib/axios";
 import { auth } from "@/lib/firebase";
@@ -28,6 +29,7 @@ interface AuthContextType {
   firebaseUser: User | null;
   backendSession: AuthSession | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   refreshSession: () => Promise<void>;
 }
 
@@ -50,27 +52,52 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const refreshSession = useCallback(async () => {
-    const currentFirebaseUser = auth.currentUser;
+    setIsLoading(true);
 
-    if (!currentFirebaseUser) {
-      clearAuthSession();
-      setBackendSession(null);
-      return;
+    try {
+      const currentFirebaseUser = auth.currentUser;
+
+      if (!currentFirebaseUser) {
+        clearAuthSession();
+        setFirebaseUser(null);
+        setBackendSession(null);
+        return;
+      }
+
+      const verifiedSession = await getVerifiedAuthSession();
+
+      if (!isSessionForFirebaseUser(verifiedSession, currentFirebaseUser)) {
+        clearAuthSession();
+        setBackendSession(null);
+        return;
+      }
+
+      setFirebaseUser(currentFirebaseUser);
+      setBackendSession(verifiedSession);
+    } finally {
+      setIsLoading(false);
     }
-
-    const verifiedSession = await getVerifiedAuthSession();
-
-    if (!isSessionForFirebaseUser(verifiedSession, currentFirebaseUser)) {
-      clearAuthSession();
-      setBackendSession(null);
-      return;
-    }
-
-    setBackendSession(verifiedSession);
   }, []);
 
   useEffect(() => {
     let isMounted = true;
+
+    async function resetAuthState(shouldSignOutFirebase = false) {
+      clearAuthSession();
+
+      if (shouldSignOutFirebase) {
+        try {
+          await signOut(auth);
+        } catch {
+          // ignore firebase signOut error
+        }
+      }
+
+      if (!isMounted) return;
+
+      setFirebaseUser(null);
+      setBackendSession(null);
+    }
 
     async function syncUser(user: User): Promise<void> {
       const verifiedSession = await getVerifiedAuthSession();
@@ -101,8 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       try {
         if (!user) {
-          clearAuthSession();
-          setBackendSession(null);
+          await resetAuthState(false);
           return;
         }
 
@@ -110,12 +136,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         logApiError("Auth sync failed:", error);
 
-        const fallbackSession = getAuthSession();
+        const status = axios.isAxiosError(error)
+          ? error.response?.status
+          : undefined;
 
-        if (isSessionForFirebaseUser(fallbackSession, user)) {
-          setBackendSession(fallbackSession);
-        } else {
-          clearAuthSession();
+        if (status === 401 || status === 419) {
+          await resetAuthState(true);
+          return;
+        }
+
+        if (isMounted) {
           setBackendSession(null);
         }
       } finally {
@@ -167,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       firebaseUser,
       backendSession,
       isLoading,
+      isAuthenticated: Boolean(backendSession),
       refreshSession,
     }),
     [firebaseUser, backendSession, isLoading, refreshSession],

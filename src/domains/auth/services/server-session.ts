@@ -24,7 +24,10 @@ function normalizeAuthSession(
       user: response.user,
       roles: response.roles ?? [],
       active_role: response.active_role ?? "",
-      api_token: "api_token" in response ? response.api_token : apiToken,
+      api_token:
+        "api_token" in response && response.api_token
+          ? response.api_token
+          : apiToken,
     };
   }
 

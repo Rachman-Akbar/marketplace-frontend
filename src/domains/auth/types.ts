@@ -1,17 +1,22 @@
-export type AuthUser = {
-  id: string;
-  firebase_uid: string | null;
-  email: string;
-  name: string | null;
-  avatar: string | null;
-  is_email_verified: boolean;
-};
+export interface AuthUser {
+  id: number | string;
+  firebase_uid: string;
+  name?: string | null;
+  email?: string | null;
+  avatar?: string | null;
+  [key: string]: unknown;
+}
 
-export type AuthResponse = {
+export interface AuthSession {
   user: AuthUser;
   roles: string[];
   active_role: string;
   api_token: string;
-};
+}
 
-export type AuthSession = AuthResponse;
+export interface AuthResponse {
+  user: AuthUser;
+  roles?: string[];
+  active_role?: string;
+  api_token: string;
+}

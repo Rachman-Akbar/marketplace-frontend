@@ -1,7 +1,5 @@
-// src/lib/axios.ts
-
-
 import axios from "axios";
+
 import { AUTH_STORAGE_KEY } from "@/domains/auth/constants";
 
 export const API_ORIGIN =
@@ -11,6 +9,7 @@ export const API_BASE_URL = `${API_ORIGIN.replace(/\/$/, "")}/api/v1`;
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
+  withCredentials: false,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -24,14 +23,29 @@ api.interceptors.request.use((config) => {
     return config;
   }
 
-  const session = localStorage.getItem(AUTH_STORAGE_KEY);
+  /**
+   * Penting:
+   * Kalau request sudah membawa Authorization sendiri,
+   * jangan ditimpa oleh api_token dari localStorage.
+   *
+   * Ini dibutuhkan untuk endpoint firebase-login/firebase-register
+   * yang memakai Firebase ID token.
+   */
+  const existingAuthorization =
+    config.headers.Authorization ?? config.headers.authorization;
 
-  if (!session) {
+  if (existingAuthorization) {
+    return config;
+  }
+
+  const rawSession = localStorage.getItem(AUTH_STORAGE_KEY);
+
+  if (!rawSession) {
     return config;
   }
 
   try {
-    const parsed = JSON.parse(session) as {
+    const parsed = JSON.parse(rawSession) as {
       api_token?: string;
     };
 

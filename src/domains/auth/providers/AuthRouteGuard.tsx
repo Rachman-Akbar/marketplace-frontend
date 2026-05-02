@@ -33,11 +33,15 @@ export function AuthRouteGuard({ children }: AuthRouteGuardProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { backendSession, isLoading } = useAuth();
+  const { firebaseUser, backendSession, isLoading } = useAuth();
 
   const guestOnly = isGuestOnlyPath(pathname);
   const protectedRoute = isProtectedPath(pathname);
-  const isLoggedIn = !!backendSession;
+
+  const isLoggedIn =
+    !!firebaseUser &&
+    !!backendSession &&
+    backendSession.user.firebase_uid === firebaseUser.uid;
 
   useEffect(() => {
     if (isLoading) return;

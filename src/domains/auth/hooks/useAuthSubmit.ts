@@ -2,10 +2,15 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "firebase/auth";
 import type { User } from "firebase/auth";
 
+import { auth } from "@/lib/firebase";
 import { getAxiosErrorMessage } from "@/lib/axios";
-import { syncFirebaseUserToBackend } from "@/domains/auth";
+import {
+  clearAuthSession,
+  syncFirebaseUserToBackend,
+} from "@/domains/auth";
 
 export function useAuthSubmit(defaultErrorMessage: string) {
   const router = useRouter();
@@ -28,6 +33,14 @@ export function useAuthSubmit(defaultErrorMessage: string) {
         router.replace("/");
         router.refresh();
       } catch (submitError) {
+        clearAuthSession();
+
+        try {
+          await signOut(auth);
+        } catch {
+          // Abaikan. Tujuannya hanya membersihkan state login lokal.
+        }
+
         setError(getAxiosErrorMessage(submitError, defaultErrorMessage));
       } finally {
         setIsSubmitting(false);

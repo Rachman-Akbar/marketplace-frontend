@@ -1,47 +1,66 @@
-import type { CheckoutSummary } from "@/domains/checkout/types";
-import type { CreateOrderPayload, Order, OrderItem } from "@/domains/order/types";
+import { api, getAxiosErrorMessage } from "@/lib/axios";
 
-type CreateOrderFromCheckoutInput = {
-  form: CreateOrderPayload;
-  summary: CheckoutSummary;
-};
+import type {
+  CancelOrderPayload,
+  Order,
+  OrderResponse,
+  OrdersQuery,
+  OrdersResponse,
+} from "../types";
 
-function mapCheckoutItemToOrderItem(
-  item: CheckoutSummary["items"][number]
-): OrderItem {
-  return {
-    id: item.id,
-    product_id: item.product_id,
-    product_name: item.product_name,
-    image_url: item.image_url,
-    variant: item.variant,
-    price: item.price,
-    quantity: item.quantity,
-    subtotal: item.subtotal,
-  };
+function cleanParams(params: OrdersQuery): Record<string, string> {
+  const result: Record<string, string> = {};
+
+  for (const [key, value] of Object.entries(params)) {
+    if (value === undefined || value === null || value === "") continue;
+
+    result[key] = String(value);
+  }
+
+  return result;
 }
 
-export async function createOrderFromCheckout({
-  form,
-  summary,
-}: CreateOrderFromCheckoutInput): Promise<Order> {
-  await new Promise((resolve) => globalThis.setTimeout(resolve, 500));
+export async function getOrders(
+  params: OrdersQuery = {},
+): Promise<OrdersResponse> {
+  try {
+    const response = await api.get<OrdersResponse>("/orders", {
+      params: cleanParams(params),
+    });
 
-  const createdAt = new Date().toISOString();
-  const orderNumber = `ORD-${Date.now()}`;
+    return {
+      data: response.data.data ?? [],
+      meta: response.data.meta,
+    };
+  } catch (error) {
+    throw new Error(getAxiosErrorMessage(error, "Gagal memuat orders."));
+  }
+}
 
-  return {
-    id: globalThis.crypto?.randomUUID?.() ?? orderNumber,
-    order_number: orderNumber,
-    items: summary.items.map(mapCheckoutItemToOrderItem),
-    shipping_address: form.shipping_address,
-    payment_method: form.payment_method,
-    notes: form.notes,
-    subtotal: summary.subtotal,
-    shipping: summary.shipping,
-    estimated_tax: summary.estimatedTax,
-    grand_total: summary.grandTotal,
-    status: form.payment_method === "cod" ? "processing" : "waiting_payment",
-    created_at: createdAt,
-  };
+export async function getOrderDetail(identifier: string): Promise<Order> {
+  try {
+    const response = await api.get<OrderResponse>(
+      `/orders/${encodeURIComponent(identifier)}`,
+    );
+
+    return response.data.data;
+  } catch (error) {
+    throw new Error(getAxiosErrorMessage(error, "Gagal memuat detail order."));
+  }
+}
+
+export async function cancelOrder(
+  identifier: string,
+  payload: CancelOrderPayload = {},
+): Promise<Order> {
+  try {
+    const response = await api.post<OrderResponse>(
+      `/orders/${encodeURIComponent(identifier)}/cancel`,
+      payload,
+    );
+
+    return response.data.data;
+  } catch (error) {
+    throw new Error(getAxiosErrorMessage(error, "Gagal membatalkan order."));
+  }
 }

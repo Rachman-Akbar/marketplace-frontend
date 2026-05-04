@@ -1,227 +1,183 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useCancelOrder } from "@/hooks/useCancelOrder";
-import { useOrderDetail } from "@/hooks/useOrderDetail";
+import { useParams, useRouter } from "next/navigation";
+
+import { OrderStatusBadge } from "@/domains/order/components/OrderStatusBadge";
+import { useCancelOrder } from "@/domains/order/hooks/useCancelOrder";
+import { useOrderDetail } from "@/domains/order/hooks/useOrderDetail";
 import {
+  canCancelOrder,
   formatCurrency,
   formatDate,
-  getOrderHistories,
   getOrderItems,
-  resolveShippingAddress,
-} from "@/lib/ordering/orderUtils";
-import OrderItemsTable from "@/components/ordering/OrderItemsTable";
-import OrderStatusBadge from "@/components/ordering/OrderStatusBadge";
-import OrderSummaryBox from "@/components/ordering/OrderSummaryBox";
+  getOrderTrackingRoute,
+} from "@/domains/order/services/orderUtils";
 
 export default function OrderDetailPage() {
-  const params = useParams();
-  const orderId = String(params.id);
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
 
-  const { order, loading, error, fetchOrder } = useOrderDetail(orderId);
-  const { cancelOrder, loading: cancelling, error: cancelError } =
-    useCancelOrder();
+  const identifier = decodeURIComponent(params.id);
+  const { order, loading, error, fetchOrder, setOrder } =
+    useOrderDetail(identifier);
+
+  const {
+    cancelOrder,
+    loading: cancelling,
+    error: cancelError,
+  } = useCancelOrder();
 
   async function handleCancel() {
-    const reason = window.prompt("Masukkan alasan pembatalan:");
+    if (!order) return;
 
-    if (!reason) return;
+    const confirmed = window.confirm("Batalkan order ini?");
+    if (!confirmed) return;
 
-    await cancelOrder(orderId, {
-      reason,
+    const result = await cancelOrder(order.order_number, {
+      reason: "Cancelled by customer",
     });
 
-    await fetchOrder(orderId);
+    if (result) {
+      setOrder(result);
+    }
   }
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-xl bg-white p-6 text-center text-slate-500 shadow-sm">
-          Loading order detail...
-        </div>
+      <div className="rounded-xl bg-white p-6 text-center text-slate-500 shadow-sm">
+        Loading order detail...
       </div>
     );
   }
 
   if (error || !order) {
     return (
-      <div className="mx-auto max-w-5xl">
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 text-red-700">
-          {error || "Order tidak ditemukan"}
-        </div>
-
-        <Link
-          href="/orders"
-          className="mt-5 inline-block font-bold text-emerald-700"
+      <div className="rounded-xl border border-red-200 bg-red-50 p-6 text-red-700">
+        <p>{error ?? "Order tidak ditemukan."}</p>
+        <button
+          type="button"
+          onClick={() => void fetchOrder()}
+          className="mt-4 rounded-lg bg-red-600 px-4 py-2 font-semibold text-white"
         >
-          ← Back to Orders
-        </Link>
+          Coba Lagi
+        </button>
       </div>
     );
   }
 
-  const address = resolveShippingAddress(order.shipping_address);
   const items = getOrderItems(order);
-  const histories = getOrderHistories(order);
-
-  const canCancel = ["pending", "confirmed", "processing"].includes(
-    order.status,
-  );
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
-      <header>
-        <Link
-          href="/orders"
-          className="mb-4 inline-block text-sm font-bold text-emerald-700"
-        >
-          ← Back to Orders
-        </Link>
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <Link href="/orders" className="font-semibold text-emerald-700">
+            ← Kembali ke orders
+          </Link>
 
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-          <div>
-            <h1 className="text-5xl font-extrabold tracking-tight">
-              Order Detail
-            </h1>
-            <p className="mt-2 text-slate-500">
-              Order #{order.order_number} • {formatDate(order.created_at)}
-            </p>
-          </div>
+          <h1 className="mt-4 text-4xl font-extrabold">
+            Order #{order.order_number}
+          </h1>
 
-          <OrderStatusBadge status={order.status} />
+          <p className="mt-2 text-slate-500">
+            Dibuat pada {formatDate(order.created_at)}
+          </p>
         </div>
-      </header>
 
-      {cancelError ? (
+        <OrderStatusBadge status={order.status} />
+      </div>
+
+      {(cancelError || error) && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-          {cancelError}
+          {cancelError || error}
         </div>
-      ) : null}
+      )}
 
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="space-y-5">
-          <div className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-2xl font-extrabold tracking-tight">
-              Items
-            </h2>
+      <section className="rounded-xl bg-white p-6 shadow-sm">
+        <h2 className="text-xl font-bold">Items</h2>
 
-            <OrderItemsTable items={items} />
-          </div>
-
-          <div className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-2xl font-extrabold tracking-tight">
-              Payment and Shipping
-            </h2>
-
-            <div className="space-y-3 text-sm text-slate-600">
-              <p>
-                Payment Method:{" "}
-                <span className="font-bold capitalize text-slate-900">
-                  {order.payment_method?.replaceAll("_", " ") ?? "-"}
-                </span>
-              </p>
-
-              <p>
-                Payment Status:{" "}
-                <span className="font-bold capitalize text-slate-900">
-                  {order.payment_status}
-                </span>
-              </p>
-
-              <div className="rounded-lg bg-slate-100 p-4">
-                <p className="font-bold text-slate-900">
-                  {address.recipient_name}
+        <div className="mt-5 space-y-4">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className="flex justify-between gap-4 border-b border-slate-100 pb-4 last:border-0 last:pb-0"
+            >
+              <div>
+                <p className="font-semibold">{item.product_name}</p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Qty {item.quantity} ×{" "}
+                  {formatCurrency(item.unit_price, order.currency)}
                 </p>
-                <p>{address.phone}</p>
-                <p>{address.address_line}</p>
-                <p>
-                  {address.district}, {address.city}
-                </p>
-                <p>
-                  {address.province}, {address.postal_code}
-                </p>
-                {address.notes ? <p>Catatan: {address.notes}</p> : null}
               </div>
-            </div>
-          </div>
 
-          <div className="rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-2xl font-extrabold tracking-tight">
-              Status History
-            </h2>
-
-            <div className="space-y-3">
-              {histories.length === 0 ? (
-                <p className="text-sm text-slate-500">
-                  Belum ada riwayat status.
-                </p>
-              ) : (
-                histories.map((history) => (
-                  <div
-                    key={history.id}
-                    className="rounded-lg bg-slate-100 p-4 text-sm"
-                  >
-                    <p className="font-bold capitalize text-slate-900">
-                      {history.from_status ?? "-"} → {history.to_status}
-                    </p>
-
-                    {history.note ? (
-                      <p className="mt-1 text-slate-600">{history.note}</p>
-                    ) : null}
-
-                    <p className="mt-1 text-xs text-slate-400">
-                      {formatDate(history.created_at)}
-                    </p>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          <OrderSummaryBox order={order} />
-
-          <aside className="h-fit rounded-xl bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-2xl font-extrabold tracking-tight">
-              Order Actions
-            </h2>
-
-            <Link
-              href={`/orders/${order.id}/tracking`}
-              className="block w-full rounded-lg bg-emerald-700 py-3 text-center font-bold text-white"
-            >
-              Track Order
-            </Link>
-
-            <button
-              type="button"
-              className="mt-3 w-full rounded-lg border border-slate-300 py-3 font-semibold text-slate-700"
-            >
-              Download Invoice
-            </button>
-
-            {canCancel ? (
-              <button
-                type="button"
-                disabled={cancelling}
-                onClick={handleCancel}
-                className="mt-3 w-full rounded-lg bg-red-50 py-3 font-semibold text-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {cancelling ? "Cancelling..." : "Cancel Order"}
-              </button>
-            ) : null}
-
-            <div className="mt-5 rounded-lg bg-slate-100 p-4">
-              <p className="text-xs text-slate-500">Total Amount</p>
-              <p className="text-3xl font-extrabold text-emerald-700">
-                {formatCurrency(order.grand_total, order.currency)}
+              <p className="font-bold">
+                {formatCurrency(item.subtotal, order.currency)}
               </p>
             </div>
-          </aside>
+          ))}
         </div>
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-xl bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-bold">Alamat Pengiriman</h2>
+          <div className="mt-4 space-y-1 text-sm text-slate-600">
+            <p>{order.shipping_address?.recipient_name}</p>
+            <p>{order.shipping_address?.phone}</p>
+            <p>{order.shipping_address?.address_line}</p>
+            <p>
+              {order.shipping_address?.district
+                ? `${order.shipping_address.district}, `
+                : ""}
+              {order.shipping_address?.city}, {order.shipping_address?.province}
+            </p>
+            <p>{order.shipping_address?.postal_code}</p>
+          </div>
+        </div>
+
+        <div className="rounded-xl bg-white p-6 shadow-sm">
+          <h2 className="text-xl font-bold">Ringkasan</h2>
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex justify-between">
+              <span>Subtotal</span>
+              <span>{formatCurrency(order.subtotal, order.currency)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Ongkir</span>
+              <span>
+                {formatCurrency(order.shipping_cost, order.currency)}
+              </span>
+            </div>
+            <div className="flex justify-between border-t border-slate-200 pt-3 text-base font-bold">
+              <span>Total</span>
+              <span>
+                {formatCurrency(order.grand_total, order.currency)}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={() => router.push(getOrderTrackingRoute(order))}
+          className="rounded-lg bg-emerald-700 px-5 py-3 font-bold text-white"
+        >
+          Lacak Order
+        </button>
+
+        {canCancelOrder(order.status) ? (
+          <button
+            type="button"
+            disabled={cancelling}
+            onClick={handleCancel}
+            className="rounded-lg bg-red-600 px-5 py-3 font-bold text-white disabled:opacity-50"
+          >
+            {cancelling ? "Membatalkan..." : "Batalkan Order"}
+          </button>
+        ) : null}
       </div>
     </div>
   );

@@ -1,10 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useOrders } from "@/hooks/useOrders";
-import { formatCurrency, formatDate, getOrderItems } from "@/lib/ordering/orderUtils";
-import { OrderStatus } from "@/types/order";
-import OrderStatusBadge from "@/components/ordering/OrderStatusBadge";
+
+import { OrderStatusBadge } from "@/domains/order/components/OrderStatusBadge";
+import { useOrders } from "@/domains/order/hooks/useOrders";
+import {
+  formatCurrency,
+  formatDate,
+  getOrderDetailRoute,
+  getOrderItems,
+} from "@/domains/order/services/orderUtils";
+import type { OrderStatus } from "@/domains/order/types";
 
 const filters: Array<{ label: string; value: OrderStatus | "" }> = [
   { label: "All Orders", value: "" },
@@ -23,7 +29,7 @@ export default function OrdersPage() {
   });
 
   function handleFilter(status: OrderStatus | "") {
-    fetchOrders({
+    void fetchOrders({
       status,
       page: 1,
     });
@@ -32,7 +38,7 @@ export default function OrdersPage() {
   function handleNextPage() {
     if (!meta || meta.current_page >= meta.last_page) return;
 
-    fetchOrders({
+    void fetchOrders({
       page: meta.current_page + 1,
     });
   }
@@ -40,7 +46,7 @@ export default function OrdersPage() {
   function handlePreviousPage() {
     if (!meta || meta.current_page <= 1) return;
 
-    fetchOrders({
+    void fetchOrders({
       page: meta.current_page - 1,
     });
   }
@@ -52,7 +58,7 @@ export default function OrdersPage() {
           Order History
         </h1>
         <p className="mt-2 max-w-2xl text-slate-500">
-          Review your past acquisitions and track currently active shipments.
+          Review your orders and track active shipments.
         </p>
       </header>
 
@@ -101,7 +107,10 @@ export default function OrdersPage() {
           const firstItem = items[0];
 
           return (
-            <div key={order.id} className="rounded-xl bg-white p-6 shadow-sm">
+            <div
+              key={order.id}
+              className="rounded-xl bg-white p-6 shadow-sm"
+            >
               <div className="flex gap-4">
                 <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-3xl font-extrabold text-emerald-700">
                   {firstItem?.product_name?.charAt(0)?.toUpperCase() ?? "O"}
@@ -137,7 +146,7 @@ export default function OrdersPage() {
                     </p>
 
                     <Link
-                      href={`/orders/${order.id}`}
+                      href={getOrderDetailRoute(order)}
                       className="font-bold text-emerald-700"
                     >
                       View Detail

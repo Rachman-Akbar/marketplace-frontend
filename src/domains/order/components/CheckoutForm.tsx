@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useCreateOrder } from "@/hooks/useCreateOrder";
+import { useCreateOrder } from "@/domains/order/hooks/useCreateOrder";
 import { CreateOrderPayload } from "@/types/order";
 
 export default function CheckoutForm() {

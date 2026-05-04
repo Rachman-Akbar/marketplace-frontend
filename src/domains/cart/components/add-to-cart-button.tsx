@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import { useCart } from "../use-cart";
+
+import { useAuth } from "@/domains/auth/context/AuthContext";
+import { useCart } from "@/domains/cart/hooks/useCart";
 
 type AddToCartButtonProps = {
   productId: number;
@@ -17,17 +18,25 @@ export function AddToCartButton({
   stock,
 }: AddToCartButtonProps) {
   const router = useRouter();
-  const { addItem, pendingProductId } = useCart({ autoFetch: false });
+
+  const { firebaseUser, backendSession, isLoading } = useAuth();
+  const { addItem, pendingProductId } = useCart();
+
   const [success, setSuccess] = useState(false);
 
   const numericStock = Number(stock ?? 0);
   const isPending = pendingProductId === productId;
   const isOutOfStock = numericStock <= 0;
 
-  async function handleAddToCart() {
-    const user = auth.currentUser;
+  const isLoggedIn =
+    !!firebaseUser &&
+    !!backendSession &&
+    backendSession.user.firebase_uid === firebaseUser.uid;
 
-    if (!user) {
+  async function handleAddToCart() {
+    if (isLoading) return;
+
+    if (!isLoggedIn) {
       window.alert("Silakan login terlebih dahulu untuk menambahkan produk ke cart.");
       router.push("/login");
       return;
@@ -54,7 +63,7 @@ export function AddToCartButton({
     <div className="space-y-2">
       <button
         type="button"
-        disabled={isPending || isOutOfStock}
+        disabled={isLoading || isPending || isOutOfStock}
         onClick={handleAddToCart}
         className="w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
       >

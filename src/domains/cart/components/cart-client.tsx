@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCart } from "../use-cart";
+
+import { useCart } from "../hooks/useCart";
 import { CartItemRow } from "./cart-item-row";
 import { CartSummaryCard } from "./cart-summary-card";
 
@@ -59,7 +60,9 @@ export function CartClient() {
 
         <button
           type="button"
-          onClick={() => fetchCart()}
+          onClick={() => {
+            void fetchCart();
+          }}
           className="rounded-lg bg-emerald-700 px-5 py-2 font-semibold text-white"
         >
           Coba Lagi

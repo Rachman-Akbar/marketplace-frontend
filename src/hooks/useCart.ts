@@ -1,6 +1,6 @@
 'use client';
 
-import { CartContext } from '@/context/CartContext';
+import { CartContext } from '@/domains/cart/context/CartContext';
 import { useContext } from 'react';
 
 export function useCart() {

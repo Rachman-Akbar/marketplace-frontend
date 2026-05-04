@@ -1,7 +1,9 @@
-import { auth } from "@/lib/firebase";
 import { api, getAxiosErrorMessage } from "@/lib/axios";
+import { getAuthSession } from "@/domains/auth/services/session";
+
 import { CART_ENDPOINTS } from "./constants";
 import { normalizeCart, type RawCart } from "./mapper";
+
 import type {
   AddCartItemPayload,
   Cart,
@@ -11,14 +13,12 @@ import type {
 
 type CartResponse = CartApiResponse | Cart | RawCart;
 
-async function getFirebaseToken(): Promise<string> {
-  const user = auth.currentUser;
+function ensureBackendSession(): void {
+  const session = getAuthSession();
 
-  if (!user) {
-    throw new Error("User belum login.");
+  if (!session?.api_token) {
+    throw new Error("Silakan login terlebih dahulu.");
   }
-
-  return user.getIdToken();
 }
 
 function resolveCartResponse(response: CartResponse): Cart {
@@ -31,7 +31,7 @@ async function cartRequest<T>(
   url: string,
   data?: unknown,
 ): Promise<T> {
-  const token = await getFirebaseToken();
+  ensureBackendSession();
 
   try {
     const response = await api.request<T>({
@@ -40,7 +40,6 @@ async function cartRequest<T>(
       data,
       headers: {
         Accept: "application/json",
-        Authorization: `Bearer ${token}`,
       },
     });
 

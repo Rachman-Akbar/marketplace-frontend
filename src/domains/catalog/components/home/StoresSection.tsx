@@ -1,5 +1,5 @@
-import { StoreCard } from "@/components/catalog/StoreCard";
-import { SectionHeader } from "@/components/catalog/SectionHeader";
+import { StoreCard } from "@/domains/stores/components/StoreCard";
+import { SectionHeader } from "@/domains/catalog/components/SectionHeader";
 import { toStoreRoute } from "@/domains/catalog/services/catalogRoutes";
 import { CATALOG_PLACEHOLDER_IMAGE } from "@/domains/catalog";
 

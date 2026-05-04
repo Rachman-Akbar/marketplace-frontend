@@ -7,6 +7,7 @@ export type StoreProductImage = {
 
 export type StoreProduct = {
   id: number | string;
+
   store_id?: number | string;
   category_id?: number | string | null;
   seller_id?: number | string | null;
@@ -30,7 +31,9 @@ export type StoreProduct = {
     id?: number | string;
     name?: string | null;
     slug?: string | null;
-    logo_url?: string | null;
+    logo?: string | null;
+    city?: string | null;
+    province?: string | null;
   } | null;
 
   images?: StoreProductImage[];

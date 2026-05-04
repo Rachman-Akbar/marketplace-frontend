@@ -22,7 +22,6 @@ export function ProductSellerCard({ product }: ProductSellerCardProps) {
 
   const logoUrl =
     store.logo_url ||
-    store.logo ||
     "https://via.placeholder.com/120x120?text=Store";
 
   const storeIdentifier =

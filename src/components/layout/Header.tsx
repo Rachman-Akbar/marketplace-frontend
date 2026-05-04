@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Container } from "@/components/layout/Container";
 import { getServerAuthSession } from "@/domains/auth/services/server-session";
-import { getServerCartSummary } from "@/lib/cart/server-cart";
+import { getServerCartSummary } from "@/domains/cart/server-cart";
 
 import { HeaderActions } from "./HeaderActions";
 import { HeaderNav } from "./HeaderNav";

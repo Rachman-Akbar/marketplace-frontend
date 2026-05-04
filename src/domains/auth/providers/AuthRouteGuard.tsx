@@ -3,7 +3,7 @@
 import { ReactNode, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/domains/auth/context/AuthContext";
 
 type AuthRouteGuardProps = {
   children: ReactNode;

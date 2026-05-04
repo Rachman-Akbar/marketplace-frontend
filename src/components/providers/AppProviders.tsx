@@ -2,9 +2,9 @@
 
 import type { ReactNode } from "react";
 
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/domains/auth/context/AuthContext";
 import { AuthRouteGuard } from "@/domains/auth/providers/AuthRouteGuard";
-import { CartProvider } from "@/context/CartContext";
+import { CartProvider } from "@/domains/cart/context/CartContext";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -13,9 +13,9 @@ type AppProvidersProps = {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <AuthProvider>
-      <AuthRouteGuard>
-        <CartProvider>{children}</CartProvider>
-      </AuthRouteGuard>
+      <CartProvider>
+        <AuthRouteGuard>{children}</AuthRouteGuard>
+      </CartProvider>
     </AuthProvider>
   );
 }

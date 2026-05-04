@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosHeaders } from "axios";
 
 import { AUTH_STORAGE_KEY } from "@/domains/auth/constants";
 
@@ -18,43 +18,54 @@ export const api = axios.create({
 
 export const clientApi = api;
 
-api.interceptors.request.use((config) => {
-  if (typeof window === "undefined") {
-    return config;
-  }
-
-  /**
-   * Penting:
-   * Kalau request sudah membawa Authorization sendiri,
-   * jangan ditimpa oleh api_token dari localStorage.
-   *
-   * Ini dibutuhkan untuk endpoint firebase-login/firebase-register
-   * yang memakai Firebase ID token.
-   */
-  const existingAuthorization =
-    config.headers.Authorization ?? config.headers.authorization;
-
-  if (existingAuthorization) {
-    return config;
-  }
+function getStoredApiToken(): string | null {
+  if (typeof window === "undefined") return null;
 
   const rawSession = localStorage.getItem(AUTH_STORAGE_KEY);
 
-  if (!rawSession) {
-    return config;
-  }
+  if (!rawSession) return null;
 
   try {
     const parsed = JSON.parse(rawSession) as {
       api_token?: string;
     };
 
-    if (parsed.api_token) {
-      config.headers.Authorization = `Bearer ${parsed.api_token}`;
-    }
+    return typeof parsed.api_token === "string" && parsed.api_token.trim()
+      ? parsed.api_token
+      : null;
   } catch {
     localStorage.removeItem(AUTH_STORAGE_KEY);
+    return null;
   }
+}
+
+api.interceptors.request.use((config) => {
+  if (typeof window === "undefined") {
+    return config;
+  }
+
+  const headers = AxiosHeaders.from(config.headers);
+
+  /**
+   * Penting:
+   * Jika request sudah membawa Authorization manual,
+   * jangan ditimpa.
+   *
+   * Ini wajib untuk:
+   * - /identity/auth/firebase-login
+   * - /identity/auth/firebase-register
+   *
+   * Karena dua endpoint itu pakai Firebase ID token.
+   */
+  if (!headers.has("Authorization")) {
+    const apiToken = getStoredApiToken();
+
+    if (apiToken) {
+      headers.set("Authorization", `Bearer ${apiToken}`);
+    }
+  }
+
+  config.headers = headers;
 
   return config;
 });
@@ -100,7 +111,7 @@ export function getAxiosErrorMessage(
   return fallback;
 }
 
-export function logApiError(label: string, error: unknown) {
+export function logApiError(label: string, error: unknown): void {
   const logger =
     process.env.NODE_ENV === "development" ? console.warn : console.error;
 

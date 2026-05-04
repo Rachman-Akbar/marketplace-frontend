@@ -1,4 +1,4 @@
-import { ProductCard } from "@/components/catalog/ProductCard";
+import { ProductCard } from "@/domains/catalog/components/product/ProductCard";
 import { toProductRoute } from "@/domains/catalog/services/catalogRoutes";
 import type { Store } from "../types/store";
 import type { StoreProduct } from "../types/storeProduct";

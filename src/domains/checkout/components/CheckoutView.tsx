@@ -1,47 +1,49 @@
-import type { CheckoutViewProps } from "@/domains/checkout/types";
-import { CheckoutForm } from "@/domains/checkout/components/CheckoutForm";
-import { CheckoutHeader } from "@/domains/checkout/components/CheckoutHeader";
-import { EmptyCartState } from "@/domains/checkout/components/EmptyCartState";
-import { OrderSummary } from "@/domains/checkout/components/OrderSummary";
+"use client";
 
-export function CheckoutView(props: CheckoutViewProps) {
-  if (props.cartLoading) {
+import type { CheckoutViewProps } from "../types";
+import { CheckoutForm } from "./CheckoutForm";
+import { EmptyCartState } from "./EmptyCartState";
+import { OrderSummary } from "./OrderSummary";
+
+export function CheckoutView({
+  form,
+  summary,
+  cartLoading,
+  creatingOrder,
+  error,
+  validationErrors,
+  isCartEmpty,
+  onSubmit,
+  onShippingAddressChange,
+  onPaymentMethodChange,
+  onNotesChange,
+}: CheckoutViewProps) {
+  if (cartLoading) {
     return (
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <div className="rounded-2xl bg-white p-8 shadow-sm ring-1 ring-slate-100">
-          Memuat checkout...
-        </div>
-      </main>
+      <div className="rounded-2xl border border-gray-200 bg-white p-10 text-center">
+        <p className="text-sm text-slate-500">Memuat keranjang...</p>
+      </div>
     );
   }
 
-  if (props.isCartEmpty) {
-    return (
-      <main className="mx-auto max-w-6xl px-4 py-8">
-        <CheckoutHeader />
-        <EmptyCartState />
-      </main>
-    );
+  if (isCartEmpty) {
+    return <EmptyCartState />;
   }
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <CheckoutHeader />
+    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
+      <CheckoutForm
+        form={form}
+        creatingOrder={creatingOrder}
+        error={error}
+        validationErrors={validationErrors}
+        onSubmit={onSubmit}
+        onShippingAddressChange={onShippingAddressChange}
+        onPaymentMethodChange={onPaymentMethodChange}
+        onNotesChange={onNotesChange}
+      />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
-        <CheckoutForm
-          form={props.form}
-          creatingOrder={props.creatingOrder}
-          error={props.error}
-          validationErrors={props.validationErrors}
-          onSubmit={props.onSubmit}
-          onShippingAddressChange={props.onShippingAddressChange}
-          onPaymentMethodChange={props.onPaymentMethodChange}
-          onNotesChange={props.onNotesChange}
-        />
-
-        <OrderSummary summary={props.summary} />
-      </div>
-    </main>
+      <OrderSummary summary={summary} />
+    </div>
   );
 }

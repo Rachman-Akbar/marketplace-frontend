@@ -1,27 +1,48 @@
+"use client";
+
 import type { FormEvent } from "react";
-import { useMemo, useState } from "react";
-import type { Cart } from "@/domains/cart/types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+
+import { useCart } from "@/domains/cart/hooks/useCart";
 import type { Order } from "@/domains/order/types";
-import { createOrderFromCheckout } from "@/domains/order/services/orderService";
-import { buildCartSummary } from "@/domains/checkout/services/checkoutService";
+
+import {
+  buildCartSummary,
+  createCheckout,
+} from "@/domains/checkout/services/checkoutService";
 import { useCheckoutForm } from "@/domains/checkout/application/useCheckoutForm";
 
 type UseCheckoutControllerParams = {
-  cart: Cart | null;
-  cartLoading?: boolean;
   onOrderCreated?: (order: Order) => void;
 };
 
-export function useCheckoutController({
-  cart,
-  cartLoading = false,
-  onOrderCreated,
-}: UseCheckoutControllerParams) {
+export function useCheckoutController(
+  params: UseCheckoutControllerParams = {},
+) {
+  const { onOrderCreated } = params;
+
+  const router = useRouter();
+
+  const {
+    cart,
+    loading: cartLoading,
+    error: cartError,
+    fetchCart,
+    clear,
+  } = useCart();
+
   const checkoutForm = useCheckoutForm();
 
   const [creatingOrder, setCreatingOrder] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [createdOrder, setCreatedOrder] = useState<Order | null>(null);
+
+  useEffect(() => {
+    fetchCart().catch(() => {
+      // Error sudah disimpan di CartContext.
+    });
+  }, [fetchCart]);
 
   const summary = useMemo(() => {
     return buildCartSummary(cart);
@@ -29,50 +50,63 @@ export function useCheckoutController({
 
   const isCartEmpty = !cartLoading && summary.items.length === 0;
 
-  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const onSubmit = useCallback(
+    async (event: FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
 
-    setError(null);
-    setCreatedOrder(null);
+      setError(null);
+      setCreatedOrder(null);
 
-    if (isCartEmpty) {
-      setError("Keranjang masih kosong.");
-      return;
-    }
+      if (isCartEmpty) {
+        setError("Keranjang masih kosong.");
+        return;
+      }
 
-    const isValid = checkoutForm.validate();
+      const isValid = checkoutForm.validate();
 
-    if (!isValid) {
-      return;
-    }
+      if (!isValid) {
+        return;
+      }
 
-    try {
-      setCreatingOrder(true);
+      try {
+        setCreatingOrder(true);
 
-      const order = await createOrderFromCheckout({
-        form: checkoutForm.form,
-        summary,
-      });
+        const response = await createCheckout(checkoutForm.form);
 
-      setCreatedOrder(order);
-      onOrderCreated?.(order);
-    } catch (unknownError) {
-      setError(
-        unknownError instanceof Error
-          ? unknownError.message
-          : "Gagal membuat order. Coba lagi."
-      );
-    } finally {
-      setCreatingOrder(false);
-    }
-  };
+        const order = response.data;
+
+        setCreatedOrder(order);
+        onOrderCreated?.(order);
+
+        await clear();
+
+        router.replace(`/orders/${order.order_number}`);
+        router.refresh();
+      } catch (unknownError) {
+        setError(
+          unknownError instanceof Error
+            ? unknownError.message
+            : "Gagal membuat order. Coba lagi.",
+        );
+      } finally {
+        setCreatingOrder(false);
+      }
+    },
+    [
+      checkoutForm,
+      clear,
+      isCartEmpty,
+      onOrderCreated,
+      router,
+    ],
+  );
 
   return {
     form: checkoutForm.form,
     summary,
     cartLoading,
     creatingOrder,
-    error,
+    error: error ?? cartError,
     validationErrors: checkoutForm.validationErrors,
     isCartEmpty,
     createdOrder,

@@ -1,5 +1,11 @@
+import { api, getAxiosErrorMessage } from "@/lib/axios";
 import type { Cart } from "@/domains/cart/types";
-import type { CreateOrderPayload } from "@/domains/order/types";
+import type {
+  CheckoutResponse,
+  CheckoutSummary,
+  CheckoutSummaryItem,
+  CreateOrderPayload,
+} from "@/domains/checkout/types";
 
 export type ShippingAddress = CreateOrderPayload["shipping_address"];
 export type PaymentMethod = CreateOrderPayload["payment_method"];
@@ -77,19 +83,68 @@ export function formatPrice(value: unknown): string {
   }).format(toNumber(value));
 }
 
-export function buildCartSummary(cart: Cart | null) {
-  const items = cart?.items ?? [];
+function getRecord(value: unknown): Record<string, unknown> {
+  if (value && typeof value === "object") {
+    return value as Record<string, unknown>;
+  }
+
+  return {};
+}
+
+function getString(value: unknown, fallback = ""): string {
+  if (typeof value === "string" && value.trim()) {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return fallback;
+}
+
+function normalizeCartItem(item: unknown, index: number): CheckoutSummaryItem {
+  const current = getRecord(item);
+  const product = getRecord(current.product);
+
+  const price = toNumber(current.price ?? product.price);
+  const quantity = toNumber(current.quantity, 1);
+  const subtotal = toNumber(current.subtotal, price * quantity);
+
+  return {
+    id: getString(current.id, `cart-item-${index + 1}`),
+    product_id: getString(
+      current.product_id ?? product.id,
+      getString(current.id, `product-${index + 1}`),
+    ),
+    product_name: getString(
+      current.product_name ?? current.name ?? product.name,
+      `Produk ${index + 1}`,
+    ),
+    image_url: getString(
+      current.product_image ??
+        current.image_url ??
+        current.imageUrl ??
+        product.image_url,
+    ),
+    variant: getString(current.variant ?? product.variant),
+    price,
+    quantity,
+    subtotal,
+  };
+}
+
+export function buildCartSummary(cart: Cart | null | undefined): CheckoutSummary {
+  const items = Array.isArray(cart?.items)
+    ? cart.items.map(normalizeCartItem)
+    : [];
 
   const totalQuantity = items.reduce((total, item) => {
-    return total + toNumber(item.quantity);
+    return total + item.quantity;
   }, 0);
 
   const subtotal = items.reduce((total, item) => {
-    const price = toNumber(item.price);
-    const quantity = toNumber(item.quantity);
-    const itemSubtotal = toNumber(item.subtotal, price * quantity);
-
-    return total + itemSubtotal;
+    return total + item.subtotal;
   }, 0);
 
   const shipping = 0;
@@ -106,4 +161,18 @@ export function buildCartSummary(cart: Cart | null) {
   };
 }
 
-export type CheckoutSummary = ReturnType<typeof buildCartSummary>;
+export async function createCheckout(
+  payload: CreateOrderPayload,
+): Promise<CheckoutResponse> {
+  try {
+    const response = await api.post<CheckoutResponse>("/checkout", payload, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw new Error(getAxiosErrorMessage(error, "Checkout gagal."));
+  }
+}

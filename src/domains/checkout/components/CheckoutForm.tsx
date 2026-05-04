@@ -1,9 +1,17 @@
-import type { ChangeEvent } from "react";
-import { FIELD_CLASS, LABEL_CLASS } from "@/domains/checkout/constants";
-import type { CheckoutViewProps } from "@/domains/checkout/types";
-import { CheckoutErrors } from "@/domains/checkout/components/CheckoutErrors";
-import { PaymentMethodSelector } from "@/domains/checkout/components/PaymentMethodSelector";
-import { ShippingAddressForm } from "@/domains/checkout/components/ShippingAddressForm";
+"use client";
+
+import type {
+  CheckoutViewProps,
+  ShippingAddress,
+} from "../types";
+import {
+  CARD_CLASS,
+  ERROR_CLASS,
+  FIELD_CLASS,
+  LABEL_CLASS,
+  PAYMENT_METHODS,
+  SHIPPING_FIELDS,
+} from "../constants";
 
 type CheckoutFormProps = Pick<
   CheckoutViewProps,
@@ -17,6 +25,13 @@ type CheckoutFormProps = Pick<
   | "onNotesChange"
 >;
 
+function firstError(
+  errors: CheckoutFormProps["validationErrors"],
+  key: string,
+): string | null {
+  return errors?.[key]?.[0] ?? null;
+}
+
 export function CheckoutForm({
   form,
   creatingOrder,
@@ -27,46 +42,129 @@ export function CheckoutForm({
   onPaymentMethodChange,
   onNotesChange,
 }: CheckoutFormProps) {
-  const handleNotesChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    onNotesChange(event.target.value);
-  };
-
   return (
-    <form onSubmit={onSubmit} className="space-y-5">
-      <CheckoutErrors error={error} />
+    <form onSubmit={onSubmit} className="space-y-6">
+      <section className={CARD_CLASS}>
+        <h2 className="text-xl font-bold text-slate-900">
+          Alamat Pengiriman
+        </h2>
 
-      <ShippingAddressForm
-        form={form}
-        validationErrors={validationErrors}
-        onShippingAddressChange={onShippingAddressChange}
-      />
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          {SHIPPING_FIELDS.map((field) => {
+            const value = form.shipping_address[field.key] ?? "";
+            const errorMessage = firstError(
+              validationErrors,
+              `shipping_address.${String(field.key)}`,
+            );
 
-      <PaymentMethodSelector
-        form={form}
-        validationErrors={validationErrors}
-        onPaymentMethodChange={onPaymentMethodChange}
-      />
+            return (
+              <label
+                key={field.key}
+                className={field.className ?? undefined}
+              >
+                <span className={LABEL_CLASS}>{field.label}</span>
 
-      <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-        <label>
-          <span className={LABEL_CLASS}>Catatan Order</span>
+                {field.textarea ? (
+                  <textarea
+                    value={value}
+                    required={field.required}
+                    onChange={(event) =>
+                      onShippingAddressChange(
+                        field.key as keyof ShippingAddress,
+                        event.target.value,
+                      )
+                    }
+                    placeholder={field.placeholder}
+                    className={`${FIELD_CLASS} mt-2 min-h-24`}
+                  />
+                ) : (
+                  <input
+                    value={value}
+                    required={field.required}
+                    onChange={(event) =>
+                      onShippingAddressChange(
+                        field.key as keyof ShippingAddress,
+                        event.target.value,
+                      )
+                    }
+                    placeholder={field.placeholder}
+                    className={`${FIELD_CLASS} mt-2`}
+                  />
+                )}
 
-          <textarea
-            rows={3}
-            className={`${FIELD_CLASS} mt-2 resize-none`}
-            placeholder="Catatan tambahan untuk penjual"
-            value={form.notes ?? ""}
-            onChange={handleNotesChange}
-          />
-        </label>
+                {errorMessage ? (
+                  <p className={ERROR_CLASS}>{errorMessage}</p>
+                ) : null}
+              </label>
+            );
+          })}
+        </div>
       </section>
+
+      <section className={CARD_CLASS}>
+        <h2 className="text-xl font-bold text-slate-900">
+          Metode Pembayaran
+        </h2>
+
+        <div className="mt-5 grid gap-3">
+          {PAYMENT_METHODS.map((method) => (
+            <label
+              key={method.value}
+              className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4"
+            >
+              <input
+                type="radio"
+                name="payment_method"
+                value={method.value}
+                checked={form.payment_method === method.value}
+                onChange={() => onPaymentMethodChange(method.value)}
+                className="mt-1"
+              />
+
+              <span>
+                <span className="block font-semibold text-slate-900">
+                  {method.label}
+                </span>
+                <span className="mt-1 block text-sm text-slate-500">
+                  {method.description}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+
+        {firstError(validationErrors, "payment_method") ? (
+          <p className={ERROR_CLASS}>
+            {firstError(validationErrors, "payment_method")}
+          </p>
+        ) : null}
+      </section>
+
+      <section className={CARD_CLASS}>
+        <h2 className="text-xl font-bold text-slate-900">
+          Catatan Pesanan
+        </h2>
+
+        <textarea
+          value={form.notes ?? ""}
+          onChange={(event) => onNotesChange(event.target.value)}
+          placeholder="Catatan untuk penjual"
+          className={`${FIELD_CLASS} mt-4 min-h-24`}
+        />
+      </section>
+
+      {error ? (
+        <div className="rounded-xl bg-red-50 p-4 text-sm font-medium text-red-700">
+          {error}
+        </div>
+      ) : null}
 
       <button
         type="submit"
         disabled={creatingOrder}
-        className="w-full rounded-xl bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+        className="w-full rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {creatingOrder ? "Membuat order..." : "Buat Order"}
+        {creatingOrder ? "Memproses order..." : "Buat Pesanan"}
       </button>
     </form>
   );

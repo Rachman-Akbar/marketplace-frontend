@@ -1,5 +1,5 @@
 import type { CheckoutSummary } from "@/domains/checkout/types";
-import { formatPrice } from "@/domains/checkout/types";
+import { formatPrice } from "@/domains/checkout/services/checkoutService";
 import { SummaryRow } from "@/domains/checkout/components/SummaryRow";
 
 type OrderSummaryProps = {

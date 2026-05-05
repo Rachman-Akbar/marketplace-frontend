@@ -1,12 +1,11 @@
 import { useState } from "react";
-import type { CreateOrderPayload } from "@/domains/order/types";
+import { createInitialCheckoutForm } from "@/domains/checkout/services/checkoutService";
 import type {
+  CreateOrderPayload,
   PaymentMethod,
   ShippingAddress,
-} from "@/domains/checkout/services/checkoutService";
-import { createInitialCheckoutForm } from "@/domains/checkout/services/checkoutService";
-
-export type ValidationErrors = Record<string, string[]> | null;
+  ValidationErrors,
+} from "@/domains/checkout/types";
 
 function required(value: string): boolean {
   return value.trim().length > 0;
@@ -14,7 +13,7 @@ function required(value: string): boolean {
 
 export function useCheckoutForm() {
   const [form, setForm] = useState<CreateOrderPayload>(() =>
-    createInitialCheckoutForm()
+    createInitialCheckoutForm(),
   );
 
   const [validationErrors, setValidationErrors] =
@@ -22,7 +21,7 @@ export function useCheckoutForm() {
 
   const onShippingAddressChange = (
     key: keyof ShippingAddress,
-    value: string
+    value: string,
   ) => {
     setForm((current) => ({
       ...current,

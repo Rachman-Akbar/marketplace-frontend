@@ -6,6 +6,7 @@ import type {
   CheckoutSummaryItem,
   CreateOrderPayload,
 } from "@/domains/checkout/types";
+import { DEFAULT_MANUAL_TRANSFER_FORM } from "@/domains/checkout/constants";
 
 export type ShippingAddress = CreateOrderPayload["shipping_address"];
 export type PaymentMethod = CreateOrderPayload["payment_method"];
@@ -22,6 +23,8 @@ export const INITIAL_CHECKOUT_FORM: CreateOrderPayload = {
     notes: "",
   },
   payment_method: "midtrans",
+  midtrans_channel: "bca_va",
+  manual_transfer: DEFAULT_MANUAL_TRANSFER_FORM,
   notes: "",
 };
 
@@ -31,6 +34,10 @@ export function createInitialCheckoutForm(): CreateOrderPayload {
       ...INITIAL_CHECKOUT_FORM.shipping_address,
     },
     payment_method: INITIAL_CHECKOUT_FORM.payment_method,
+    midtrans_channel: INITIAL_CHECKOUT_FORM.midtrans_channel,
+    manual_transfer: {
+      ...DEFAULT_MANUAL_TRANSFER_FORM,
+    },
     notes: INITIAL_CHECKOUT_FORM.notes,
   };
 }
@@ -163,11 +170,68 @@ export function buildCartSummary(
   };
 }
 
+function appendShippingAddress(formData: FormData, payload: CreateOrderPayload) {
+  Object.entries(payload.shipping_address).forEach(([key, value]) => {
+    formData.append(`shipping_address[${key}]`, String(value ?? ""));
+  });
+}
+
+function buildCheckoutFormData(payload: CreateOrderPayload): FormData {
+  const formData = new FormData();
+
+  appendShippingAddress(formData, payload);
+
+  formData.append("payment_method", payload.payment_method);
+  formData.append("notes", payload.notes ?? "");
+
+  if (payload.midtrans_channel) {
+    formData.append("midtrans_channel", payload.midtrans_channel);
+  }
+
+  if (payload.manual_transfer) {
+    formData.append(
+      "manual_transfer[bank_destination]",
+      payload.manual_transfer.bank_destination,
+    );
+    formData.append(
+      "manual_transfer[sender_account_name]",
+      payload.manual_transfer.sender_account_name,
+    );
+    formData.append(
+      "manual_transfer[sender_account_number]",
+      payload.manual_transfer.sender_account_number,
+    );
+    formData.append(
+      "manual_transfer[transfer_date]",
+      payload.manual_transfer.transfer_date,
+    );
+    formData.append(
+      "manual_transfer[admin_note]",
+      payload.manual_transfer.admin_note,
+    );
+
+    if (payload.manual_transfer.transfer_proof) {
+      formData.append(
+        "manual_transfer[transfer_proof]",
+        payload.manual_transfer.transfer_proof,
+      );
+    }
+  }
+
+  return formData;
+}
+
 export async function createCheckout(
   payload: CreateOrderPayload,
 ): Promise<CheckoutResponse> {
   try {
-    const response = await api.post<CheckoutResponse>("/checkout", payload, {
+    const shouldUseFormData =
+      payload.payment_method === "manual_transfer" &&
+      Boolean(payload.manual_transfer?.transfer_proof);
+
+    const body = shouldUseFormData ? buildCheckoutFormData(payload) : payload;
+
+    const response = await api.post<CheckoutResponse>("/checkout", body, {
       headers: {
         Accept: "application/json",
       },

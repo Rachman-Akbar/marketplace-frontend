@@ -14,6 +14,12 @@ export type PaymentStatus =
   | "refunded"
   | "cancelled";
 
+  export type PaymentMethod =
+  | "manual_transfer"
+  | "bank_transfer"
+  | "cod"
+  | "midtrans";
+
 export type Order = {
   id: number | string;
   order_number: string;

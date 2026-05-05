@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useCart } from "@/domains/cart/hooks/useCart";
 import type { Order } from "@/domains/order/types";
+import { createMidtransPayment } from "@/domains/order/services/paymentService";
 
 import {
   buildCartSummary,
@@ -29,7 +30,6 @@ export function useCheckoutController(
     loading: cartLoading,
     error: cartError,
     fetchCart,
-    clear,
   } = useCart();
 
   const checkoutForm = useCheckoutForm();
@@ -71,16 +71,29 @@ export function useCheckoutController(
       try {
         setCreatingOrder(true);
 
-        const response = await createCheckout(checkoutForm.form);
-
-        const order = response.data;
+        const checkoutResponse = await createCheckout(checkoutForm.form);
+        const order = checkoutResponse.data;
 
         setCreatedOrder(order);
         onOrderCreated?.(order);
 
-        await clear();
+        if (checkoutForm.form.payment_method === "midtrans") {
+          const payment = await createMidtransPayment(order.order_number);
 
-        router.replace(`/orders/${order.order_number}`);
+          if (!payment.redirect_url) {
+            throw new Error("Redirect URL Midtrans tidak tersedia.");
+          }
+
+          window.location.href = payment.redirect_url;
+          return;
+        }
+
+        await fetchCart();
+
+        router.replace(
+          `/orders/success?order=${encodeURIComponent(order.order_number)}`,
+        );
+
         router.refresh();
       } catch (unknownError) {
         setError(
@@ -94,7 +107,7 @@ export function useCheckoutController(
     },
     [
       checkoutForm,
-      clear,
+      fetchCart,
       isCartEmpty,
       onOrderCreated,
       router,

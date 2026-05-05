@@ -21,7 +21,7 @@ export const INITIAL_CHECKOUT_FORM: CreateOrderPayload = {
     postal_code: "",
     notes: "",
   },
-  payment_method: "manual_transfer",
+  payment_method: "midtrans",
   notes: "",
 };
 
@@ -134,7 +134,9 @@ function normalizeCartItem(item: unknown, index: number): CheckoutSummaryItem {
   };
 }
 
-export function buildCartSummary(cart: Cart | null | undefined): CheckoutSummary {
+export function buildCartSummary(
+  cart: Cart | null | undefined,
+): CheckoutSummary {
   const items = Array.isArray(cart?.items)
     ? cart.items.map(normalizeCartItem)
     : [];

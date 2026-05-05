@@ -77,6 +77,12 @@ export const PAYMENT_METHODS: Array<{
   value: PaymentMethod;
 }> = [
   {
+    label: "Midtrans",
+    description:
+      "Bayar online dengan VA, e-wallet, QRIS, kartu, dan metode lain via Midtrans.",
+    value: "midtrans",
+  },
+  {
     label: "Manual Transfer",
     description: "Bayar melalui transfer bank setelah order dibuat.",
     value: "manual_transfer",

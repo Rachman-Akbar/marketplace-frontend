@@ -4,6 +4,7 @@ import type {
   CheckoutViewProps,
   ShippingAddress,
 } from "../types";
+
 import {
   CARD_CLASS,
   ERROR_CLASS,
@@ -59,10 +60,15 @@ export function CheckoutForm({
 
             return (
               <label
-                key={field.key}
+                key={String(field.key)}
                 className={field.className ?? undefined}
               >
-                <span className={LABEL_CLASS}>{field.label}</span>
+                <span className={LABEL_CLASS}>
+                  {field.label}
+                  {field.required ? (
+                    <span className="ml-1 text-red-500">*</span>
+                  ) : null}
+                </span>
 
                 {field.textarea ? (
                   <textarea
@@ -107,30 +113,39 @@ export function CheckoutForm({
         </h2>
 
         <div className="mt-5 grid gap-3">
-          {PAYMENT_METHODS.map((method) => (
-            <label
-              key={method.value}
-              className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4"
-            >
-              <input
-                type="radio"
-                name="payment_method"
-                value={method.value}
-                checked={form.payment_method === method.value}
-                onChange={() => onPaymentMethodChange(method.value)}
-                className="mt-1"
-              />
+          {PAYMENT_METHODS.map((method) => {
+            const active = form.payment_method === method.value;
 
-              <span>
-                <span className="block font-semibold text-slate-900">
-                  {method.label}
+            return (
+              <label
+                key={method.value}
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
+                  active
+                    ? "border-emerald-600 bg-emerald-50"
+                    : "border-slate-200 bg-white"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="payment_method"
+                  value={method.value}
+                  checked={active}
+                  onChange={() => onPaymentMethodChange(method.value)}
+                  className="mt-1"
+                />
+
+                <span>
+                  <span className="block font-semibold text-slate-900">
+                    {method.label}
+                  </span>
+
+                  <span className="mt-1 block text-sm text-slate-500">
+                    {method.description}
+                  </span>
                 </span>
-                <span className="mt-1 block text-sm text-slate-500">
-                  {method.description}
-                </span>
-              </span>
-            </label>
-          ))}
+              </label>
+            );
+          })}
         </div>
 
         {firstError(validationErrors, "payment_method") ? (
